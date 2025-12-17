@@ -2,7 +2,6 @@ import {
   Home,
   Compass,
   Layers,
-  BarChart2,
   User,
   Settings,
   Sparkles,
