@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
 import Chat from "./components/Chat";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import { useAuth } from "./contexts/AuthContext";
 import "./App.css";
 
 const uid = () => crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 
 export default function App() {
+  const { user, loading: authLoading } = useAuth();
+  const [showLogin, setShowLogin] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [theme, setTheme] = useState("dark");
@@ -67,6 +72,28 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="app-root" style={{ display: "grid", placeItems: "center" }}>
+        <div>Laden...</div>
+      </div>
+    );
+  }
+
+  // Show login/signup if not authenticated
+  if (!user) {
+    return (
+      <div className="app-root" style={{ display: "grid", placeItems: "center" }}>
+        {showLogin ? (
+          <Login onSwitchToSignup={() => setShowLogin(false)} />
+        ) : (
+          <Signup onSwitchToLogin={() => setShowLogin(true)} />
+        )}
+      </div>
+    );
   }
 
   return (
