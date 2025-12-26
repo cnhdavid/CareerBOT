@@ -5,10 +5,13 @@ import {
   User,
   Settings,
   Sparkles,
-  X
+  X,
+  LogOut
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Sidebar({ open, onClose, onSettings }) {
+  const { user, logout } = useAuth();
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
 
@@ -49,17 +52,22 @@ export default function Sidebar({ open, onClose, onSettings }) {
 
       {/* BOTTOM */}
       <div className="sidebar-bottom">
-
-        <button className="sidebar-item">
+        <div className="sidebar-item" style={{ cursor: "default", gridTemplateColumns: "24px 1fr" }}>
           <User size={18} />
-          <span className="label">Konto</span>
-        </button>
+          <span className="label" style={{ fontSize: "12px", opacity: "0.7" }}>
+            {user?.email}
+          </span>
+        </div>
 
         <button className="sidebar-item" onClick={onSettings}>
           <Settings size={18} />
           <span className="label">Einstellungen</span>
         </button>
 
+        <button className="sidebar-item" onClick={logout}>
+          <LogOut size={18} />
+          <span className="label">Abmelden</span>
+        </button>
       </div>
 
     </aside>

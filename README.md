@@ -1,16 +1,63 @@
-# React + Vite
+# CareerBOT
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + Vite application with MongoDB authentication.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Install Dependencies
 
-## React Compiler
+```bash
+npm install
+cd server
+npm install
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Configure MongoDB
 
-## Expanding the ESLint configuration
+1. Create a `.env` file in the `server` directory
+2. Add your MongoDB connection string:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/careerbot?retryWrites=true&w=majority
+JWT_SECRET=your-secret-key-change-in-production
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=gpt-4o-mini
+```
+
+**To get your MongoDB connection string:**
+- Go to MongoDB Atlas
+- Click "Connect" on your cluster
+- Choose "Connect your application"
+- Copy the connection string
+- Replace `<password>` with your database password
+- Replace `<database-name>` with your database name (e.g., `careerbot`)
+
+### 3. Run the Application
+
+From the root directory:
+
+```bash
+npm run dev
+```
+
+This will start both the frontend (Vite) and backend (Express) servers.
+
+## Authentication
+
+The application includes:
+- User signup with email and password
+- User login
+- JWT token-based authentication
+- Protected routes (main app only accessible when logged in)
+- User email display in sidebar
+- Logout functionality
+
+## Project Structure
+
+- `src/` - React frontend
+  - `components/` - React components (Login, Signup, Chat, etc.)
+  - `contexts/` - React contexts (AuthContext)
+- `server/` - Express backend
+  - `models/` - MongoDB models (User)
+  - `routes/` - API routes (auth)
+  - `db.mjs` - MongoDB connection

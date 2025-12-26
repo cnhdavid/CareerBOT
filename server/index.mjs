@@ -2,13 +2,26 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import { connectDB } from "./db.mjs";
+import authRoutes from "./routes/auth.mjs";
 
 // ✅ lädt garantiert CareerBOT/server/.env
-dotenv.config({ path: new URL("./.env", import.meta.url) });
+const envPath = new URL("./.env", import.meta.url);
+dotenv.config({ path: envPath });
+
+// Log environment loading status
+console.log("📄 Loading environment from:", envPath.pathname);
+console.log("🔍 MONGODB_URI loaded:", process.env.MONGODB_URI ? "Yes" : "No");
+
+// Connect to MongoDB (non-blocking)
+connectDB().catch(console.error);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Auth routes
+app.use("/api/auth", authRoutes);
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
