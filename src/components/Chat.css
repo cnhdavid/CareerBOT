@@ -102,7 +102,7 @@
 
 .composer{
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
 
   padding: 12px 12px;
@@ -136,10 +136,17 @@
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.04);
   color: rgba(255,255,255,.9);
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: transform .08s ease, background .15s ease, opacity .15s ease;
+  padding: 0;
+}
+
+.iconBtn svg, .sendBtn svg{
+  display: block;
+  flex-shrink: 0;
 }
 
 .iconBtn:hover, .sendBtn:hover{

@@ -54,7 +54,7 @@ export default function Sidebar({ open, onClose, onSettings }) {
       <div className="sidebar-bottom">
         <div className="sidebar-item" style={{ cursor: "default", gridTemplateColumns: "24px 1fr" }}>
           <User size={18} />
-          <span className="label" style={{ fontSize: "12px", opacity: "0.7" }}>
+          <span className="label" style={{ fontSize: "12px" }}>
             {user?.email}
           </span>
         </div>
