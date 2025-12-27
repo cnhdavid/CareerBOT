@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import OpenAI from "openai";
 import { connectDB } from "./db.mjs";
 import authRoutes from "./routes/auth.mjs";
+import conversationRoutes from "./routes/conversations.mjs";
 
 // ✅ lädt garantiert CareerBOT/server/.env
 const envPath = new URL("./.env", import.meta.url);
@@ -22,6 +23,9 @@ app.use(express.json());
 
 // Auth routes
 app.use("/api/auth", authRoutes);
+
+// Conversation routes
+app.use("/api/conversations", conversationRoutes);
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

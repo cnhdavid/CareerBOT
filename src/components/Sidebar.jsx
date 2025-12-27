@@ -6,12 +6,13 @@ import {
   Settings,
   Sparkles,
   X,
-  LogOut
+  LogOut,
+  History
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function Sidebar({ open, onClose, onSettings }) {
+export default function Sidebar({ open, onClose, onSettings, onConversations, onNewChat }) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   return (
@@ -35,7 +36,7 @@ export default function Sidebar({ open, onClose, onSettings }) {
       {/* NAV */}
       <nav className="sidebar-nav">
 
-        <button className="sidebar-item">
+        <button className="sidebar-item" onClick={onNewChat}>
           <Home size={18} />
           <span className="label">{t('sidebar.home')}</span>
         </button>
@@ -48,6 +49,11 @@ export default function Sidebar({ open, onClose, onSettings }) {
         <button className="sidebar-item">
           <Layers size={18} />
           <span className="label">{t('sidebar.rooms')}</span>
+        </button>
+
+        <button className="sidebar-item" onClick={onConversations}>
+          <History size={18} />
+          <span className="label">{t('sidebar.conversations', { defaultValue: 'Conversations' })}</span>
         </button>
 
       </nav>

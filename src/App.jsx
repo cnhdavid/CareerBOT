@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
+import ConversationsModal from "./components/ConversationsModal";
 import Chat from "./components/Chat";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -16,6 +17,7 @@ export default function App() {
   const [showLogin, setShowLogin] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showConversations, setShowConversations] = useState(false);
   const [theme, setTheme] = useState("dark");
 
   const [input, setInput] = useState("");
@@ -23,21 +25,70 @@ export default function App() {
 
   // Chatverlauf
   const [messages, setMessages] = useState([]);
+  const [conversationId, setConversationId] = useState(null);
+  const [conversations, setConversations] = useState([]);
 
-  useEffect(() => {
-    document.documentElement.className = theme;
-  }, [theme]);
+  const getHeaders = () => ({
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    "Content-Type": "application/json",
+  });
 
+  const loadConversation = (conv) => {
+    setConversationId(conv._id);
+    setMessages(conv.messages.map(m => ({ id: uid(), ...m })));
+  };
+
+  const newChat = () => {
+    setConversationId(null);
+    setMessages([]);
+  };
+
+  const saveMessage = async (role, content) => {
+    if (!conversationId) return;
+    await fetch(`/api/conversations/${conversationId}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({ role, content }),
+    });
+  };
+useEffect(() => {
+
+  document.documentElement.className = theme;
+
+}, [theme]);
+
+useEffect(() => {
+
+  if (user) {
+
+    // Do not create a conversation until the first message is sent
+
+  } else {
+
+    setConversationId(null);
+
+    setMessages([]);
+
+  }
+
+}, [user]);
   async function handleSend() {
     const text = input.trim();
     if (!text || loading) return;
 
     setLoading(true);
     setInput("");
-
+  
+    if (!conversationId) {
+      const res = await fetch("/api/conversations", { method: "POST", headers: getHeaders() });
+      const conv = await res.json();
+      setConversationId(conv._id);
+    }
+  
     const userMsg = { id: uid(), role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
-
+    await saveMessage("user", text);
+  
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
@@ -55,6 +106,7 @@ export default function App() {
 
       const botMsg = { id: uid(), role: "assistant", content: botText };
       setMessages((prev) => [...prev, botMsg]);
+      await saveMessage("assistant", botText);
     } catch (e) {
       setMessages((prev) => [
         ...prev,
@@ -64,6 +116,7 @@ export default function App() {
           content: t('app.networkError'),
         },
       ]);
+      await saveMessage("assistant", t('app.networkError'));
     } finally {
       setLoading(false);
     }
@@ -97,6 +150,8 @@ export default function App() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onSettings={() => setShowSettings(true)}
+        onConversations={() => setShowConversations(true)}
+        onNewChat={newChat}
       />
 
       <div className="topbar">
@@ -131,6 +186,16 @@ export default function App() {
             theme={theme}
             setTheme={setTheme}
             onClose={() => setShowSettings(false)}
+          />
+        </>
+      )}
+
+      {showConversations && (
+        <>
+          <div className="overlay" onClick={() => setShowConversations(false)} />
+          <ConversationsModal
+            onClose={() => setShowConversations(false)}
+            onLoadConversation={loadConversation}
           />
         </>
       )}
