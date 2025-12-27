@@ -8,9 +8,11 @@ import {
   X,
   LogOut
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Sidebar({ open, onClose, onSettings }) {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
@@ -35,17 +37,17 @@ export default function Sidebar({ open, onClose, onSettings }) {
 
         <button className="sidebar-item">
           <Home size={18} />
-          <span className="label">Startseite</span>
+          <span className="label">{t('sidebar.home')}</span>
         </button>
 
         <button className="sidebar-item">
           <Compass size={18} />
-          <span className="label">Entdecken</span>
+          <span className="label">{t('sidebar.discover')}</span>
         </button>
 
         <button className="sidebar-item">
           <Layers size={18} />
-          <span className="label">Räume</span>
+          <span className="label">{t('sidebar.rooms')}</span>
         </button>
 
       </nav>
@@ -61,12 +63,12 @@ export default function Sidebar({ open, onClose, onSettings }) {
 
         <button className="sidebar-item" onClick={onSettings}>
           <Settings size={18} />
-          <span className="label">Einstellungen</span>
+          <span className="label">{t('sidebar.settings')}</span>
         </button>
 
         <button className="sidebar-item" onClick={logout}>
           <LogOut size={18} />
-          <span className="label">Abmelden</span>
+          <span className="label">{t('sidebar.logout')}</span>
         </button>
       </div>
 

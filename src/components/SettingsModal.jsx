@@ -1,11 +1,14 @@
+import { useTranslation } from "react-i18next";
+
 export default function SettingsModal({ theme, setTheme, onClose }) {
+  const { t, i18n } = useTranslation();
   return (
     <div className="settings-modal">
 
-      <h2>Einstellungen</h2>
+      <h2>{t('settings.title')}</h2>
 
       <div className="setting-row">
-        <label>Theme</label>
+        <label>{t('settings.theme')}</label>
 
         <select value={theme} onChange={e => setTheme(e.target.value)}>
           <option value="dark">Dark</option>
@@ -13,8 +16,17 @@ export default function SettingsModal({ theme, setTheme, onClose }) {
         </select>
       </div>
 
+      <div className="setting-row">
+        <label>{t('settings.language')}</label>
+
+        <select value={i18n.language} onChange={e => i18n.changeLanguage(e.target.value)}>
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
       <button className="close-btn" onClick={onClose}>
-        Schließen
+        {t('settings.close')}
       </button>
 
     </div>

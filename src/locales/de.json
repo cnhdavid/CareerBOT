@@ -1,0 +1,54 @@
+{
+  "app": {
+    "loading": "Laden...",
+    "howCanIHelp": "Wobei kann ich helfen?",
+    "initialMessage": "Ich bin ein KI-gestützter virtueller Assistent, der entwickelt wurde, um Informationen bereitzustellen und Fragen zu beantworten. Wie kann ich dir helfen?",
+    "noResponse": "Keine Antwort erhalten.",
+    "networkError": "Netzwerkfehler. Bitte erneut versuchen."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "theme": "Theme",
+    "language": "Sprache",
+    "close": "Schließen"
+  },
+  "login": {
+    "title": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "loggingIn": "Wird angemeldet...",
+    "login": "Anmelden",
+    "noAccount": "Noch kein Konto?",
+    "register": "Registrieren",
+    "loginFailed": "Login fehlgeschlagen"
+  },
+  "signup": {
+    "title": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "passwordPlaceholder": "Mindestens 6 Zeichen",
+    "confirmPlaceholder": "Passwort wiederholen",
+    "registering": "Wird registriert...",
+    "register": "Registrieren",
+    "haveAccount": "Bereits ein Konto?",
+    "login": "Anmelden",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "passwordTooShort": "Passwort muss mindestens 6 Zeichen lang sein",
+    "registrationFailed": "Registrierung fehlgeschlagen"
+  },
+  "sidebar": {
+    "home": "Startseite",
+    "discover": "Entdecken",
+    "rooms": "Räume",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+  "chat": {
+    "typing": "Schreibe…",
+    "messagePlaceholder": "Schreibe eine Nachricht…",
+    "attachment": "Anhang",
+    "send": "Senden",
+    "hint": "Enter zum Senden · Shift+Enter für neue Zeile"
+  }
+}

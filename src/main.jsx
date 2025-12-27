@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext.jsx'
+import './i18n'
 
 
 createRoot(document.getElementById('root')).render(

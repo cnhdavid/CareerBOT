@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import "./Auth.css";
 
 export default function Signup({ onSwitchToLogin }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,12 +17,12 @@ export default function Signup({ onSwitchToLogin }) {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwörter stimmen nicht überein");
+      setError(t('signup.passwordMismatch'));
       return;
     }
 
     if (password.length < 6) {
-      setError("Passwort muss mindestens 6 Zeichen lang sein");
+      setError(t('signup.passwordTooShort'));
       return;
     }
 
@@ -29,7 +31,7 @@ export default function Signup({ onSwitchToLogin }) {
     try {
       await signup(email, password);
     } catch (err) {
-      setError(err.message || "Registrierung fehlgeschlagen");
+      setError(err.message || t('signup.registrationFailed'));
     } finally {
       setLoading(false);
     }
@@ -37,13 +39,13 @@ export default function Signup({ onSwitchToLogin }) {
 
   return (
     <div className="auth-modal">
-      <h2>Registrieren</h2>
+      <h2>{t('signup.title')}</h2>
 
       <form onSubmit={handleSubmit} className="auth-form">
         {error && <div className="auth-error">{error}</div>}
 
         <div className="auth-field">
-          <label htmlFor="signup-email">E-Mail</label>
+          <label htmlFor="signup-email">{t('signup.email')}</label>
           <input
             id="signup-email"
             type="email"
@@ -55,40 +57,40 @@ export default function Signup({ onSwitchToLogin }) {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="signup-password">Passwort</label>
+          <label htmlFor="signup-password">{t('signup.password')}</label>
           <input
             id="signup-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder="Mindestens 6 Zeichen"
+            placeholder={t('signup.passwordPlaceholder')}
             minLength={6}
           />
         </div>
 
         <div className="auth-field">
-          <label htmlFor="signup-confirm">Passwort bestätigen</label>
+          <label htmlFor="signup-confirm">{t('signup.confirmPassword')}</label>
           <input
             id="signup-confirm"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            placeholder="Passwort wiederholen"
+            placeholder={t('signup.confirmPlaceholder')}
             minLength={6}
           />
         </div>
 
         <button type="submit" className="auth-submit" disabled={loading}>
-          {loading ? "Wird registriert..." : "Registrieren"}
+          {loading ? t('signup.registering') : t('signup.register')}
         </button>
       </form>
 
       <div className="auth-switch">
-        <span>Bereits ein Konto? </span>
+        <span>{t('signup.haveAccount')}</span>
         <button type="button" onClick={onSwitchToLogin} className="auth-link">
-          Anmelden
+          {t('signup.login')}
         </button>
       </div>
     </div>

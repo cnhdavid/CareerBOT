@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
 import Chat from "./components/Chat";
@@ -10,6 +11,7 @@ import "./App.css";
 const uid = () => crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 
 export default function App() {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const [showLogin, setShowLogin] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,14 +22,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   // Chatverlauf
-  const [messages, setMessages] = useState([
-    {
-      id: uid(),
-      role: "assistant",
-      content:
-        "Ich bin ein KI-gestützter virtueller Assistent, der entwickelt wurde, um Informationen bereitzustellen und Fragen zu beantworten. Wie kann ich dir helfen?",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     document.documentElement.className = theme;
@@ -56,7 +51,7 @@ export default function App() {
       });
 
       const data = await res.json();
-      const botText = data?.text || "Keine Antwort erhalten.";
+      const botText = data?.text || t('app.noResponse');
 
       const botMsg = { id: uid(), role: "assistant", content: botText };
       setMessages((prev) => [...prev, botMsg]);
@@ -66,7 +61,7 @@ export default function App() {
         {
           id: uid(),
           role: "assistant",
-          content: "Netzwerkfehler. Bitte erneut versuchen.",
+          content: t('app.networkError'),
         },
       ]);
     } finally {
@@ -78,7 +73,7 @@ export default function App() {
   if (authLoading) {
     return (
       <div className="app-root" style={{ display: "grid", placeItems: "center" }}>
-        <div>Laden...</div>
+        <div>{t('app.loading')}</div>
       </div>
     );
   }
@@ -119,8 +114,6 @@ export default function App() {
 
       <main className="main">
         <div className="desktop-center">
-          <h1>Wobei kann ich helfen?</h1>
-
           <Chat
             messages={messages}
             input={input}
@@ -132,11 +125,14 @@ export default function App() {
       </main>
 
       {showSettings && (
-        <SettingsModal
-          theme={theme}
-          setTheme={setTheme}
-          onClose={() => setShowSettings(false)}
-        />
+        <>
+          <div className="overlay" onClick={() => setShowSettings(false)} />
+          <SettingsModal
+            theme={theme}
+            setTheme={setTheme}
+            onClose={() => setShowSettings(false)}
+          />
+        </>
       )}
     </div>
   );
