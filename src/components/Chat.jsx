@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Paperclip, Send, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "./Chat.css";
 
 export default function Chat({ messages, input, setInput, loading, onSend }) {
@@ -98,7 +100,11 @@ function Message({ role, text, isTyping }) {
     <div className={`msgRow ${isUser ? "user" : "assistant"}`}>
       <div className={`msgBubble ${isUser ? "user" : "assistant"}`}>
         {!isTyping ? (
-          <span>{text}</span>
+          isUser ? (
+            <span>{text}</span>
+          ) : (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+          )
         ) : (
           <span className="typing">
             <span className="dot" />
