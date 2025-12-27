@@ -1,27 +1,28 @@
 /* Layout */
 .chatShell{
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  max-width: 980px;
-  margin: 0 auto;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
 }
 
 /* Viewport / Verlauf */
 .chatViewport{
-  height: min(64vh, 720px);
+  flex: 1;
   overflow-y: auto;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.03);
   box-shadow: 0 18px 60px rgba(0,0,0,.35);
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.22) transparent;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 .chatViewport::-webkit-scrollbar { width: 10px; }
 .chatViewport::-webkit-scrollbar-thumb{
-  background: rgba(255,255,255,.18);
+  background: var(--scrollbar-thumb);
   border-radius: 999px;
   border: 3px solid transparent;
   background-clip: padding-box;
@@ -34,6 +35,18 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 100%;
+}
+
+/* Placeholder */
+.chatPlaceholder{
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  font-size: 18px;
+  text-align: center;
 }
 
 /* Messages */
@@ -46,10 +59,10 @@
 .msgRow.assistant{ justify-content: flex-start; }
 
 .msgBubble{
-  max-width: min(74ch, 82%);
+  max-width: min(90ch, 90%);
   padding: 12px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid var(--bubble-border);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
@@ -58,13 +71,13 @@
 
 /* Assistant bubble */
 .msgBubble.assistant{
-  background: rgba(20, 27, 36, 0.96);
+  background: var(--msg-assistant-bg);
   border-bottom-left-radius: 8px;
 }
 
 /* User bubble */
 .msgBubble.user{
-  background: rgba(42, 53, 66, 0.96);
+  background: var(--msg-user-bg);
   border-bottom-right-radius: 8px;
 }
 
@@ -107,8 +120,8 @@
 
   padding: 12px 12px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(15, 21, 32, 0.92);
+  border: 1px solid var(--button-border);
+  background: var(--composer-bg);
   box-shadow: 0 18px 60px rgba(0,0,0,.35);
 }
 
@@ -119,7 +132,7 @@
   border: none;
   outline: none;
   background: transparent;
-  color: white;
+  color: var(--textarea-color);
 
   font-size: 15px;
   line-height: 1.45;
@@ -133,9 +146,9 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.9);
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,7 +163,7 @@
 }
 
 .iconBtn:hover, .sendBtn:hover{
-  background: rgba(255,255,255,.07);
+  background: var(--hover);
 }
 .iconBtn:active, .sendBtn:active{
   transform: translateY(1px);
@@ -164,7 +177,7 @@
 .composerHint{
   font-size: 12px;
   opacity: .7;
-  padding-left: 6px;
+  text-align: center;
 }
 
 /* Loading icon spin */

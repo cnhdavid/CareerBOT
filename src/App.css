@@ -9,6 +9,15 @@ html.dark {
   --icon: #ffffff;
   --input: #141416;
   --hover: rgba(255,255,255,.06);
+  --msg-assistant-bg: rgba(20, 27, 36, 0.96);
+  --msg-user-bg: rgba(42, 53, 66, 0.96);
+  --composer-bg: rgba(15, 21, 32, 0.92);
+  --textarea-color: #ffffff;
+  --scrollbar-thumb: rgba(255,255,255,.18);
+  --scrollbar-track: transparent;
+  --bubble-border: rgba(255,255,255,.10);
+  --button-bg: rgba(255,255,255,.04);
+  --button-border: rgba(255,255,255,.12);
 }
 
 html.light {
@@ -20,6 +29,15 @@ html.light {
   --icon: #0b1220;
   --input: #ffffff;
   --hover: rgba(0,0,0,.05);
+  --msg-assistant-bg: rgba(240, 248, 255, 0.96);
+  --msg-user-bg: rgba(255, 255, 255, 0.96);
+  --composer-bg: rgba(255, 255, 255, 0.92);
+  --textarea-color: #0b1220;
+  --scrollbar-thumb: rgba(0,0,0,.18);
+  --scrollbar-track: transparent;
+  --bubble-border: rgba(0,0,0,.10);
+  --button-bg: rgba(0,0,0,.04);
+  --button-border: rgba(0,0,0,.12);
 }
 
 /* ================= BASE ================= */
@@ -176,10 +194,8 @@ body {
 }
 
 .desktop-center {
-  display: grid;
-  place-items: center;
-  gap: 14px;
-  text-align: center;
+  width: 100%;
+  padding: 20px;
 }
 
 /* Stable headline height */

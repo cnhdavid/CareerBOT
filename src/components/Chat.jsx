@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Paperclip, Send, Loader2 } from "lucide-react";
 import "./Chat.css";
 
 export default function Chat({ messages, input, setInput, loading, onSend }) {
+  const { t } = useTranslation();
   const endRef = useRef(null);
   const scrollRef = useRef(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -34,6 +36,11 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
       {/* Verlauf */}
       <div className="chatViewport" ref={scrollRef} onScroll={onScroll}>
         <div className="chatInner">
+          {messages.length === 0 && !loading && (
+            <div className="chatPlaceholder">
+              <span>{t('app.howCanIHelp')}</span>
+            </div>
+          )}
           {messages.map((m) => (
             <Message key={m.id} role={m.role} text={m.content} />
           ))}
@@ -41,7 +48,7 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
           {loading && (
             <Message
               role="assistant"
-              text="Schreibe…"
+              text={t('chat.typing')}
               isTyping
             />
           )}
@@ -57,12 +64,12 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Schreibe eine Nachricht…"
+            placeholder={t('chat.messagePlaceholder')}
             rows={1}
             disabled={loading}
           />
 
-          <button className="iconBtn" type="button" aria-label="Anhang">
+          <button className="iconBtn" type="button" aria-label={t('chat.attachment')}>
             <Paperclip size={18} />
           </button>
 
@@ -71,14 +78,14 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
             type="button"
             onClick={onSend}
             disabled={!canSend}
-            aria-label="Senden"
+            aria-label={t('chat.send')}
           >
             {loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}
           </button>
         </div>
 
         <div className="composerHint">
-          Enter zum Senden · Shift+Enter für neue Zeile
+          {t('chat.hint')}
         </div>
       </div>
     </div>

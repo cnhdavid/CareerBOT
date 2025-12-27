@@ -1,0 +1,54 @@
+{
+  "app": {
+    "loading": "Loading...",
+    "howCanIHelp": "How can I help?",
+    "initialMessage": "I am an AI-powered virtual assistant designed to provide information and answer questions. How can I help you?",
+    "noResponse": "No response received.",
+    "networkError": "Network error. Please try again."
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "close": "Close"
+  },
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "loggingIn": "Logging in...",
+    "login": "Login",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "loginFailed": "Login failed"
+  },
+  "signup": {
+    "title": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordPlaceholder": "At least 6 characters",
+    "confirmPlaceholder": "Repeat password",
+    "registering": "Registering...",
+    "register": "Register",
+    "haveAccount": "Already have an account?",
+    "login": "Login",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "registrationFailed": "Registration failed"
+  },
+  "sidebar": {
+    "home": "Home",
+    "discover": "Discover",
+    "rooms": "Rooms",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "chat": {
+    "typing": "Writing…",
+    "messagePlaceholder": "Write a message…",
+    "attachment": "Attachment",
+    "send": "Send",
+    "hint": "Enter to send · Shift+Enter for new line"
+  }
+}

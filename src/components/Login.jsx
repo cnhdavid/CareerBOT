@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import "./Auth.css";
 
 export default function Login({ onSwitchToSignup }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,7 +19,7 @@ export default function Login({ onSwitchToSignup }) {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err.message || t('login.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -25,13 +27,13 @@ export default function Login({ onSwitchToSignup }) {
 
   return (
     <div className="auth-modal">
-      <h2>Anmelden</h2>
+      <h2>{t('login.title')}</h2>
 
       <form onSubmit={handleSubmit} className="auth-form">
         {error && <div className="auth-error">{error}</div>}
 
         <div className="auth-field">
-          <label htmlFor="login-email">E-Mail</label>
+          <label htmlFor="login-email">{t('login.email')}</label>
           <input
             id="login-email"
             type="email"
@@ -43,7 +45,7 @@ export default function Login({ onSwitchToSignup }) {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="login-password">Passwort</label>
+          <label htmlFor="login-password">{t('login.password')}</label>
           <input
             id="login-password"
             type="password"
@@ -56,14 +58,14 @@ export default function Login({ onSwitchToSignup }) {
         </div>
 
         <button type="submit" className="auth-submit" disabled={loading}>
-          {loading ? "Wird angemeldet..." : "Anmelden"}
+          {loading ? t('login.loggingIn') : t('login.login')}
         </button>
       </form>
 
       <div className="auth-switch">
-        <span>Noch kein Konto? </span>
+        <span>{t('login.noAccount')}</span>
         <button type="button" onClick={onSwitchToSignup} className="auth-link">
-          Registrieren
+          {t('login.register')}
         </button>
       </div>
     </div>
