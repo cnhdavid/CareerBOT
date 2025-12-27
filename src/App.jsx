@@ -93,10 +93,7 @@ useEffect(() => {
       const res = await fetch("/api/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-
-        // Wenn du im Backend den Verlauf als Kontext nutzen willst:
         body: JSON.stringify({
-          message: text,
           messages: [...messages, userMsg],
         }),
       });
