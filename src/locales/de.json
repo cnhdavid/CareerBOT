@@ -41,6 +41,7 @@
     "home": "Startseite",
     "discover": "Entdecken",
     "rooms": "Räume",
+    "conversations": "Konversationen",
     "settings": "Einstellungen",
     "logout": "Abmelden"
   },
@@ -50,5 +51,10 @@
     "attachment": "Anhang",
     "send": "Senden",
     "hint": "Enter zum Senden · Shift+Enter für neue Zeile"
+  },
+  "conversations": {
+    "title": "Konversationen",
+    "noConversations": "Keine Konversationen gefunden.",
+    "confirmDelete": "Sind Sie sicher, dass Sie diese Konversation löschen möchten?"
   }
 }
