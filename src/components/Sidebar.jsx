@@ -12,7 +12,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function Sidebar({ open, onClose, onSettings, onConversations, onNewChat }) {
+export default function Sidebar({ open, onClose, onSettings, onConversations, onNewChat, onProfile }) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   return (
@@ -60,12 +60,12 @@ export default function Sidebar({ open, onClose, onSettings, onConversations, on
 
       {/* BOTTOM */}
       <div className="sidebar-bottom">
-        <div className="sidebar-item" style={{ cursor: "default", gridTemplateColumns: "24px 1fr" }}>
+        <button className="sidebar-item" onClick={onProfile} style={{ gridTemplateColumns: "24px 1fr" }}>
           <User size={18} />
           <span className="label" style={{ fontSize: "12px" }}>
             {user?.email}
           </span>
-        </div>
+        </button>
 
         <button className="sidebar-item" onClick={onSettings}>
           <Settings size={18} />

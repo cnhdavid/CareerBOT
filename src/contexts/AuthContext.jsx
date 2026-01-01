@@ -83,6 +83,36 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const updateUser = async (userData) => {
+    const headers = {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    };
+    let body = userData;
+    if (!(userData instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(userData);
+    }
+    const res = await fetch("/api/auth/me", {
+      method: "PUT",
+      headers,
+      body,
+    });
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server error: Invalid response format");
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Update failed");
+    }
+
+    setUser(data.user);
+    return data;
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -93,6 +123,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     signup,
+    updateUser,
     logout,
     isAuthenticated: !!user,
   };

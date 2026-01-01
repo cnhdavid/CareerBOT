@@ -5,6 +5,8 @@ import OpenAI from "openai";
 import { connectDB } from "./db.mjs";
 import authRoutes from "./routes/auth.mjs";
 import conversationRoutes from "./routes/conversations.mjs";
+import User from "./models/User.mjs";
+import { authenticateToken } from "./routes/auth.mjs";
 
 const SYSTEM_PROMPT = `
 DU BIST: Ein spezialisierter Karriere- und Bildungs-Chatbot. Dein Themenfokus ist strikt begrenzt auf:
@@ -81,19 +83,38 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/answer", async (req, res) => {
+app.post("/api/answer", authenticateToken, async (req, res) => {
   try {
     const { messages } = req.body ?? {};
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "messages required" });
     }
 
+    // Fetch user data for CV information
+    const user = await User.findById(req.userId).select("targetPosition cvText cvFile");
+    let userContext = "";
+    if (user) {
+      if (user.targetPosition) {
+        userContext += `Der Nutzer bewirbt sich für die Position: ${user.targetPosition}. `;
+      }
+      if (user.cvText) {
+        userContext += `CV Informationen: ${user.cvText}. `;
+      }
+      if (user.cvFile) {
+        userContext += `CV Datei verfügbar: ${user.cvFile}. `;
+      }
+    }
+
     const conversationMessages = messages.map(m => ({ role: m.role, content: m.content }));
+
+    const enhancedSystemPrompt = userContext
+      ? `${SYSTEM_PROMPT}\n\nNUTZER-KONTEXT: ${userContext}`
+      : SYSTEM_PROMPT;
 
     const response = await client.chat.completions.create({
   model: process.env.OPENAI_MODEL || "gpt-4o-mini",
   messages: [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: enhancedSystemPrompt },
     ...conversationMessages,
   ],
 });

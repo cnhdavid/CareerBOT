@@ -1,11 +1,12 @@
 /* Layout */
 .chatShell{
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 1200px;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -247,8 +248,22 @@
 
 /* Mobile tweaks */
 @media (max-width: 640px){
+  .chatShell{ top: 48px; height: calc(100vh - 48px); }
   .chatInner{ padding: 14px 12px; }
   .msgBubble{ max-width: 92%; }
-  .chatViewport{ height: 62vh; border-radius: 16px; }
+  .chatViewport{ border-radius: 16px; }
   .composer{ border-radius: 14px; }
+}
+
+/* Desktop: center chat in main area */
+@media (min-width: 901px) {
+  .chatShell {
+    left: calc(50% + 32px);
+  }
+}
+
+@media (min-width: 1420px) {
+  .chatShell {
+    left: calc(50% + 110px);
+  }
 }

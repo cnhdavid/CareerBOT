@@ -1,10 +1,12 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import multer from "multer";
 import User from "../models/User.mjs";
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const upload = multer({ dest: 'uploads/' });
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -116,7 +118,10 @@ router.post("/login", async (req, res) => {
     }
 
     // Check password
+    console.log("Attempting to compare password for user:", user.email);
+    console.log("Stored password hash:", user.password);
     const isPasswordValid = await user.comparePassword(password);
+    console.log("Password comparison result:", isPasswordValid);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
@@ -170,11 +175,96 @@ router.get("/me", authenticateToken, async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name,
+        surname: user.surname,
+        birthday: user.birthday,
+        targetPosition: user.targetPosition,
+        cvText: user.cvText,
+        cvFile: user.cvFile,
+        professionalSummary: user.professionalSummary,
+        skills: user.skills,
+        phone: user.phone,
+        address: user.address,
+        workExperience: user.workExperience,
+        education: user.education,
+        certifications: user.certifications,
+        languages: user.languages,
+        projects: user.projects,
+        awards: user.awards,
+        references: user.references,
       },
     });
   } catch (error) {
     console.error("Get user error:", error);
     res.status(500).json({ error: "Error fetching user" });
+  }
+});
+
+// Update user profile route
+router.put("/me", authenticateToken, upload.single('cvFile'), async (req, res) => {
+  try {
+    const { email, password, name, surname, birthday, targetPosition, cvText, professionalSummary, skills, phone, address, workExperience, education, certifications, languages, projects, awards, references } = req.body;
+
+    const updateData = {};
+    if (email !== undefined) updateData.email = email;
+    if (password !== undefined) updateData.password = password;
+    if (name !== undefined) updateData.name = name;
+    if (surname !== undefined) updateData.surname = surname;
+    if (birthday !== undefined) updateData.birthday = birthday ? new Date(birthday) : null;
+    if (targetPosition !== undefined) updateData.targetPosition = targetPosition;
+    if (cvText !== undefined) updateData.cvText = cvText;
+    if (req.file) updateData.cvFile = req.file.filename;
+    if (professionalSummary !== undefined) updateData.professionalSummary = professionalSummary;
+    if (skills !== undefined) updateData.skills = skills ? skills.split(',').map(s => s.trim()) : [];
+    if (phone !== undefined) updateData.phone = phone;
+    if (address !== undefined) updateData.address = address;
+    if (workExperience !== undefined) updateData.workExperience = workExperience ? JSON.parse(workExperience) : [];
+    if (education !== undefined) updateData.education = education ? JSON.parse(education) : [];
+    if (certifications !== undefined) updateData.certifications = certifications ? JSON.parse(certifications) : [];
+    if (languages !== undefined) updateData.languages = languages ? JSON.parse(languages) : [];
+    if (projects !== undefined) updateData.projects = projects ? JSON.parse(projects) : [];
+    if (awards !== undefined) updateData.awards = awards ? JSON.parse(awards) : [];
+    if (references !== undefined) updateData.references = references ? JSON.parse(references) : [];
+
+    const user = await User.findByIdAndUpdate(req.userId, updateData, { new: true }).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        surname: user.surname,
+        birthday: user.birthday,
+        targetPosition: user.targetPosition,
+        cvText: user.cvText,
+        cvFile: user.cvFile,
+        professionalSummary: user.professionalSummary,
+        skills: user.skills,
+        phone: user.phone,
+        address: user.address,
+        workExperience: user.workExperience,
+        education: user.education,
+        certifications: user.certifications,
+        languages: user.languages,
+        projects: user.projects,
+        awards: user.awards,
+        references: user.references,
+      },
+    });
+  } catch (error) {
+    console.error("Update user error:", error);
+    if (error.name === "ValidationError") {
+      const validationMessages = Object.values(error.errors || {}).map(e => e.message).join(", ");
+      return res.status(400).json({ error: validationMessages || error.message });
+    }
+    if (error.name === "MongoServerError" && error.code === 11000) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+    res.status(500).json({ error: "Error updating user" });
   }
 });
 
