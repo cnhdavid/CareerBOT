@@ -252,3 +252,29 @@
   .chatViewport{ height: 62vh; border-radius: 16px; }
   .composer{ border-radius: 14px; }
 }
+
+/* Static resources panel */
+.resourcesCard {
+  margin: 10px 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+}
+
+.resourcesTitle {
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.resourcesList {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.resourcesList a {
+  text-decoration: underline;
+}

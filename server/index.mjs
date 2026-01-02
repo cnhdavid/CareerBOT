@@ -81,6 +81,30 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
+function detectTopic(messages) {
+  const lastUser = [...messages].reverse().find(m => m.role === "user")?.content ?? "";
+  const text = lastUser.toLowerCase();
+
+  // lightweight keyword detection for MVP
+  if (/(software|programm|coding|code|entwickl|developer|it|informatik|data|ki|ai|cloud|devops|cyber|security|netzwerk|sql)/i.test(text)) {
+    return "IT";
+  }
+  if (/(medizin|pflege|arzt|ärztin|krankenhaus|patient|therapie|pharma)/i.test(text)) {
+    return "Medicine";
+  }
+  if (/(wirtschaft|business|bwl|management|marketing|sales|finance|controlling|startup)/i.test(text)) {
+    return "Business";
+  }
+  if (/(studium|uni|fh|hochschule|ausbildung|weiterbildung|zertifikat|kurs|bootcamp)/i.test(text)) {
+    return "Education";
+  }
+  if (/(bewerbung|lebenslauf|cv|anschreiben|interview|vorstellungsgespräch|assessment|gehaltsverhandlung|linkedin)/i.test(text)) {
+    return "Application";
+  }
+
+  return "Other";
+}
+
 app.post("/api/answer", async (req, res) => {
   try {
     const { messages } = req.body ?? {};
@@ -89,6 +113,8 @@ app.post("/api/answer", async (req, res) => {
     }
 
     const conversationMessages = messages.map(m => ({ role: m.role, content: m.content }));
+
+    const topic = detectTopic(conversationMessages);
 
     const response = await client.chat.completions.create({
   model: process.env.OPENAI_MODEL || "gpt-4o-mini",
@@ -99,7 +125,7 @@ app.post("/api/answer", async (req, res) => {
 });
 
 
-    res.json({ text: response.choices[0]?.message?.content ?? "" });
+    res.json({ text: response.choices[0]?.message?.content ?? "", topic });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "OpenAI request failed" });

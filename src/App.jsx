@@ -28,6 +28,9 @@ export default function App() {
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
 
+  const [topic, setTopic] = useState("Other");
+
+
   const getHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
     "Content-Type": "application/json",
@@ -41,6 +44,7 @@ export default function App() {
   const newChat = () => {
     setConversationId(null);
     setMessages([]);
+    setTopic("Other");
   };
 
   const saveMessage = async (role, content) => {
@@ -100,6 +104,8 @@ useEffect(() => {
 
       const data = await res.json();
       const botText = data?.text || t('app.noResponse');
+
+      setTopic(data?.topic || "Other");
 
       const botMsg = { id: uid(), role: "assistant", content: botText };
       setMessages((prev) => [...prev, botMsg]);
@@ -172,6 +178,7 @@ useEffect(() => {
             setInput={setInput}
             loading={loading}
             onSend={handleSend}
+            topic={topic}
           />
         </div>
       </main>
