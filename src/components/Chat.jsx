@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Paperclip, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ResourcesPanel from "./ResourcesPanel";
 import "./Chat.css";
 
-export default function Chat({ messages, input, setInput, loading, onSend }) {
+export default function Chat({ messages, input, setInput, loading, onSend, topic }) {
   const { t } = useTranslation();
   const endRef = useRef(null);
   const scrollRef = useRef(null);
@@ -58,6 +59,8 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
           <div ref={endRef} />
         </div>
       </div>
+
+      <ResourcesPanel topic={topic} />
 
       {/* Composer */}
       <div className="composerBar">
