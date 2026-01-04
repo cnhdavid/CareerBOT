@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { connectDB } from "./db.mjs";
 import authRoutes from "./routes/auth.mjs";
 import conversationRoutes from "./routes/conversations.mjs";
+import uploadRoutes from "./routes/upload.mjs";
 
 const SYSTEM_PROMPT = `
 DU BIST: Ein spezialisierter Karriere- und Bildungs-Chatbot. Dein Themenfokus ist strikt begrenzt auf:
@@ -72,6 +73,9 @@ app.use("/api/auth", authRoutes);
 
 // Conversation routes
 app.use("/api/conversations", conversationRoutes);
+
+// Upload routes
+app.use("/api/upload", uploadRoutes);
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

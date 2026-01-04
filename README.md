@@ -12,6 +12,13 @@ cd server
 npm install
 ```
 
+New Dependencies for File Upload:
+
+```bash
+cd server
+npm install multer mammoth pdfjs-dist
+```
+
 ### 2. Configure MongoDB
 
 1. Create a `.env` file in the `server` directory
