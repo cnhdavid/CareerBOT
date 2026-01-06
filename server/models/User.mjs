@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema({
   cvFile: {
     type: String, // path or URL to uploaded CV file
   },
+  // New CV Form Fields
   phone: {
     type: String,
     trim: true,
@@ -43,53 +44,60 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  professionalSummary: {
+  city: {
+    type: String,
+    trim: true,
+  },
+  country: {
+    type: String,
+    trim: true,
+  },
+  postalCode: {
+    type: String,
+    trim: true,
+  },
+  linkedin: {
+    type: String,
+    trim: true,
+  },
+  github: {
+    type: String,
+    trim: true,
+  },
+  portfolio: {
+    type: String,
+    trim: true,
+  },
+  summary: {
     type: String,
   },
-  workExperience: [{
-    jobTitle: { type: String, required: true },
-    company: { type: String, required: true },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    description: { type: String },
+  experience: [{
+    company: String,
+    position: String,
+    startDate: String,
+    endDate: String,
+    description: String
   }],
   education: [{
-    degree: { type: String, required: true },
-    institution: { type: String, required: true },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    description: { type: String },
+    institution: String,
+    degree: String,
+    field: String,
+    startDate: String,
+    endDate: String,
+    gpa: String
   }],
-  skills: [String],
-  certifications: [{
-    name: { type: String, required: true },
-    issuer: { type: String },
-    date: { type: Date },
-    description: { type: String },
-  }],
-  languages: [{
-    language: { type: String, required: true },
-    proficiency: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Native'], default: 'Intermediate' },
-  }],
-  projects: [{
-    name: { type: String, required: true },
-    description: { type: String },
-    url: { type: String },
-    technologies: [String],
-  }],
-  awards: [{
-    name: { type: String, required: true },
-    issuer: { type: String },
-    date: { type: Date },
-    description: { type: String },
-  }],
-  references: [{
-    name: { type: String, required: true },
-    position: { type: String },
-    company: { type: String },
-    email: { type: String },
-    phone: { type: String },
-  }],
+  skills: {
+    type: String,
+  },
+  languages: {
+    type: String,
+  },
+  certifications: {
+    type: String,
+  },
+  references: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

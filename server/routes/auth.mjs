@@ -62,6 +62,28 @@ router.post("/signup", async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name,
+        surname: user.surname,
+        birthday: user.birthday,
+        targetPosition: user.targetPosition,
+        cvText: user.cvText,
+        cvFile: user.cvFile,
+        // CV Form Fields
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        linkedin: user.linkedin,
+        github: user.github,
+        portfolio: user.portfolio,
+        summary: user.summary,
+        experience: user.experience,
+        education: user.education,
+        skills: user.skills,
+        languages: user.languages,
+        certifications: user.certifications,
+        references: user.references,
       },
     });
   } catch (error) {
@@ -135,6 +157,28 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name,
+        surname: user.surname,
+        birthday: user.birthday,
+        targetPosition: user.targetPosition,
+        cvText: user.cvText,
+        cvFile: user.cvFile,
+        // CV Form Fields
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        linkedin: user.linkedin,
+        github: user.github,
+        portfolio: user.portfolio,
+        summary: user.summary,
+        experience: user.experience,
+        education: user.education,
+        skills: user.skills,
+        languages: user.languages,
+        certifications: user.certifications,
+        references: user.references,
       },
     });
   } catch (error) {
@@ -181,16 +225,21 @@ router.get("/me", authenticateToken, async (req, res) => {
         targetPosition: user.targetPosition,
         cvText: user.cvText,
         cvFile: user.cvFile,
-        professionalSummary: user.professionalSummary,
-        skills: user.skills,
+        // New CV fields
         phone: user.phone,
         address: user.address,
-        workExperience: user.workExperience,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        linkedin: user.linkedin,
+        github: user.github,
+        portfolio: user.portfolio,
+        summary: user.summary,
+        experience: user.experience,
         education: user.education,
-        certifications: user.certifications,
+        skills: user.skills,
         languages: user.languages,
-        projects: user.projects,
-        awards: user.awards,
+        certifications: user.certifications,
         references: user.references,
       },
     });
@@ -203,28 +252,39 @@ router.get("/me", authenticateToken, async (req, res) => {
 // Update user profile route
 router.put("/me", authenticateToken, upload.single('cvFile'), async (req, res) => {
   try {
-    const { email, password, name, surname, birthday, targetPosition, cvText, professionalSummary, skills, phone, address, workExperience, education, certifications, languages, projects, awards, references } = req.body;
+    const { 
+      email, password, name, surname, birthday, targetPosition, cvText, cvFile,
+      // New CV form fields
+      phone, address, city, country, postalCode, linkedin, github, portfolio, summary,
+      experience, education, skills, languages, certifications, references
+    } = req.body;
 
     const updateData = {};
     if (email !== undefined) updateData.email = email;
-    if (password !== undefined) updateData.password = password;
+    if (password !== undefined && password !== "") updateData.password = password;
     if (name !== undefined) updateData.name = name;
     if (surname !== undefined) updateData.surname = surname;
     if (birthday !== undefined) updateData.birthday = birthday ? new Date(birthday) : null;
     if (targetPosition !== undefined) updateData.targetPosition = targetPosition;
     if (cvText !== undefined) updateData.cvText = cvText;
     if (req.file) updateData.cvFile = req.file.filename;
-    if (professionalSummary !== undefined) updateData.professionalSummary = professionalSummary;
-    if (skills !== undefined) updateData.skills = skills ? skills.split(',').map(s => s.trim()) : [];
+    
+    // New CV fields
     if (phone !== undefined) updateData.phone = phone;
     if (address !== undefined) updateData.address = address;
-    if (workExperience !== undefined) updateData.workExperience = workExperience ? JSON.parse(workExperience) : [];
+    if (city !== undefined) updateData.city = city;
+    if (country !== undefined) updateData.country = country;
+    if (postalCode !== undefined) updateData.postalCode = postalCode;
+    if (linkedin !== undefined) updateData.linkedin = linkedin;
+    if (github !== undefined) updateData.github = github;
+    if (portfolio !== undefined) updateData.portfolio = portfolio;
+    if (summary !== undefined) updateData.summary = summary;
+    if (experience !== undefined) updateData.experience = experience ? JSON.parse(experience) : [];
     if (education !== undefined) updateData.education = education ? JSON.parse(education) : [];
-    if (certifications !== undefined) updateData.certifications = certifications ? JSON.parse(certifications) : [];
-    if (languages !== undefined) updateData.languages = languages ? JSON.parse(languages) : [];
-    if (projects !== undefined) updateData.projects = projects ? JSON.parse(projects) : [];
-    if (awards !== undefined) updateData.awards = awards ? JSON.parse(awards) : [];
-    if (references !== undefined) updateData.references = references ? JSON.parse(references) : [];
+    if (skills !== undefined) updateData.skills = skills;
+    if (languages !== undefined) updateData.languages = languages;
+    if (certifications !== undefined) updateData.certifications = certifications;
+    if (references !== undefined) updateData.references = references;
 
     const user = await User.findByIdAndUpdate(req.userId, updateData, { new: true }).select("-password");
     if (!user) {
@@ -242,16 +302,21 @@ router.put("/me", authenticateToken, upload.single('cvFile'), async (req, res) =
         targetPosition: user.targetPosition,
         cvText: user.cvText,
         cvFile: user.cvFile,
-        professionalSummary: user.professionalSummary,
-        skills: user.skills,
+        // New CV fields
         phone: user.phone,
         address: user.address,
-        workExperience: user.workExperience,
+        city: user.city,
+        country: user.country,
+        postalCode: user.postalCode,
+        linkedin: user.linkedin,
+        github: user.github,
+        portfolio: user.portfolio,
+        summary: user.summary,
+        experience: user.experience,
         education: user.education,
-        certifications: user.certifications,
+        skills: user.skills,
         languages: user.languages,
-        projects: user.projects,
-        awards: user.awards,
+        certifications: user.certifications,
         references: user.references,
       },
     });

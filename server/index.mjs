@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import multer from "multer";
 import { connectDB } from "./db.mjs";
 import authRoutes from "./routes/auth.mjs";
 import conversationRoutes from "./routes/conversations.mjs";
@@ -69,6 +70,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Configure multer for file uploads
+const upload = multer({ dest: 'uploads/' });
+
 // Auth routes
 app.use("/api/auth", authRoutes);
 
@@ -124,6 +128,145 @@ app.post("/api/answer", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "OpenAI request failed" });
+  }
+});
+
+// CV Analysis endpoint
+app.post("/api/analyze-cv", authenticateToken, upload.single('cvFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "CV file is required" });
+    }
+
+    // Read the uploaded file
+    const fs = await import('fs');
+    const path = await import('path');
+    
+    const filePath = path.join(process.cwd(), req.file.path);
+    const fileBuffer = fs.readFileSync(filePath);
+    
+    let cvText = "";
+    
+    // Extract text from different file types
+    if (req.file.mimetype === 'text/plain') {
+      cvText = fileBuffer.toString('utf-8');
+    } else if (req.file.mimetype === 'application/pdf') {
+      try {
+        // Use pdf-parse to extract text from PDF
+        const pdfParse = await import('pdf-parse');
+        const pdfData = await pdfParse.default(fileBuffer);
+        cvText = pdfData.text;
+        console.log('PDF text extracted successfully, length:', cvText.length);
+      } catch (pdfError) {
+        console.error('PDF parsing error:', pdfError);
+        cvText = `PDF file uploaded: ${req.file.originalname}. Error extracting text: ${pdfError.message}`;
+      }
+    } else if (req.file.mimetype === 'application/msword' || req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      // For Word documents, we'd need mammoth.js or similar, but for now:
+      cvText = `Word document uploaded: ${req.file.originalname}. Note: Word document parsing requires additional libraries.`;
+    } else {
+      cvText = `Document uploaded: ${req.file.originalname}. File type: ${req.file.mimetype}`;
+    }
+
+    // Clean up the uploaded file
+    fs.unlinkSync(filePath);
+
+    // Use OpenAI to analyze the CV and extract structured data
+    const analysisPrompt = `
+    You are a CV/resume analysis expert. Extract REAL information from the following CV text.
+
+    CV TEXT TO ANALYZE:
+    ${cvText}
+
+    YOUR TASK:
+    Extract ONLY the information that is actually present in the CV text above.
+    Do NOT make up, invent, or generate any information that is not explicitly stated in the text.
+    If information is not found, use empty strings or empty arrays.
+
+    REQUIRED JSON FORMAT:
+    {
+      "name": "",
+      "surname": "",
+      "phone": "",
+      "address": "",
+      "city": "",
+      "country": "",
+      "postalCode": "",
+      "email": "",
+      "linkedin": "",
+      "github": "",
+      "portfolio": "",
+      "summary": "",
+      "targetPosition": "",
+      "experience": [
+        {
+          "company": "",
+          "position": "",
+          "startDate": "",
+          "endDate": "",
+          "description": ""
+        }
+      ],
+      "education": [
+        {
+          "institution": "",
+          "degree": "",
+          "field": "",
+          "startDate": "",
+          "endDate": "",
+          "gpa": ""
+        }
+      ],
+      "skills": "",
+      "languages": "",
+      "certifications": "",
+      "references": ""
+    }
+
+    CRITICAL INSTRUCTIONS:
+    1. Extract ONLY information that is explicitly written in the CV text
+    2. Do NOT generate or invent any data
+    3. If a field is not mentioned in the CV, leave it as an empty string
+    4. For dates, use the exact format found in the CV or convert to MM/YYYY
+    5. Return ONLY the JSON object - no markdown, no explanations
+    6. Be precise and accurate - this is for real user data
+    `;
+
+    const response = await client.chat.completions.create({
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a CV analysis expert. Extract information accurately and return only valid JSON." },
+        { role: "user", content: analysisPrompt }
+      ],
+      temperature: 0.1
+    });
+
+    const analysisText = response.choices[0]?.message?.content || "{}";
+    
+    // Clean up the response to handle markdown code blocks
+    let cleanedText = analysisText.trim();
+    
+    // Remove markdown code blocks if present
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    console.log("Cleaned OpenAI response:", cleanedText);
+    
+    try {
+      const parsedData = JSON.parse(cleanedText);
+      res.json({ success: true, data: parsedData });
+    } catch (parseError) {
+      console.error("Failed to parse OpenAI response:", parseError);
+      console.error("Original response:", analysisText);
+      console.error("Cleaned response:", cleanedText);
+      res.status(500).json({ error: "Failed to parse CV analysis" });
+    }
+  } catch (err) {
+    console.error("CV Analysis error:", err);
+    res.status(500).json({ error: "CV analysis failed" });
   }
 });
 
