@@ -79,7 +79,7 @@ body {
 }
 
 /* Desktop expand on hover */
-@media (min-width: 901px) {
+@media (min-width: 1420px) {
   .sidebar:hover {
     width: 220px;
   }
@@ -303,14 +303,14 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 320px;
+  width: 500px;
   background: var(--panel);
   border-radius: 12px;
   border: 1px solid var(--border);
-  padding: 18px 20px;
+  padding: 24px 28px;
   z-index: 60;
   display: grid;
-  gap: 12px;
+  gap: 16px;
   box-shadow: 0 20px 50px rgba(0,0,0,.6);
 }
 
@@ -350,6 +350,142 @@ body {
 }
 
 .close-btn:hover { opacity: .9; }
+
+/* ================= PROFILE ================= */
+
+.profile-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1400px;
+  max-width: 95vw;
+  background: var(--panel);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 24px 32px;
+  z-index: 60;
+  box-shadow: 0 20px 50px rgba(0,0,0,.6);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.profile-modal h2 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-size: 18px;
+}
+
+.form-group {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.profile-modal label {
+  font-size: 13px;
+  opacity: .7;
+}
+
+.profile-modal input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.profile-modal input:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+.profile-modal textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.profile-modal textarea:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+.advanced-toggle {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--button-bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background .15s;
+}
+
+.advanced-toggle:hover {
+  background: var(--hover);
+}
+
+.file-info {
+  font-size: 12px;
+  opacity: .7;
+  margin-top: 4px;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cancel-btn,
+.save-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: .15s;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  background: var(--button-bg);
+  border: 1px solid var(--button-border);
+  color: var(--text);
+}
+
+.cancel-btn:hover {
+  background: var(--hover);
+}
+
+.save-btn {
+  background: #1f2933;
+  color: #fff;
+}
+
+.save-btn:hover {
+  opacity: .9;
+}
+
+.save-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
 
 /* ================= CONVERSATIONS ================= */
 

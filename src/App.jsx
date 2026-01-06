@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
 import ConversationsModal from "./components/ConversationsModal";
+import ProfileModal from "./components/ProfileModal";
 import Chat from "./components/Chat";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -18,6 +19,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showConversations, setShowConversations] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [theme, setTheme] = useState("dark");
 
   const [input, setInput] = useState("");
@@ -186,7 +188,10 @@ useEffect(() => {
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           messages: [...messages, userMsg],
         }),
@@ -245,6 +250,7 @@ useEffect(() => {
         onSettings={() => setShowSettings(true)}
         onConversations={() => setShowConversations(true)}
         onNewChat={newChat}
+        onProfile={() => setShowProfile(true)}
       />
 
       <div className="topbar">
@@ -292,6 +298,13 @@ useEffect(() => {
             onClose={() => setShowConversations(false)}
             onLoadConversation={loadConversation}
           />
+        </>
+      )}
+
+      {showProfile && (
+        <>
+          <div className="overlay" onClick={() => setShowProfile(false)} />
+          <ProfileModal onClose={() => setShowProfile(false)} />
         </>
       )}
     </div>
