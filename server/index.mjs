@@ -42,6 +42,13 @@ DATENSCHUTZ & PROFESSIONALITÄT:
 - Kein herablassender Ton, keine Spekulationen über Personen/Unternehmen.
 - Keine diskriminierenden Inhalte.
 
+NUTZER-PROFIL NUTZUNG:
+- Wenn ein NUTZER-PROFIL verfügbar ist, nutze diese Informationen, um personalisierte und relevante Antworten zu geben.
+- Beziehe dich auf die bisherige Erfahrung, Ausbildung, Skills und Ziele des Nutzers.
+- Passe deine Empfehlungen an den aktuellen Kenntnisstand, die Karrierestufe und die Ziele des Nutzers an.
+- Verwende die Profilinformationen, um konkrete und umsetzbare Ratschläge zu geben (z. B. "Basierend auf deiner Erfahrung als...").
+- Wenn der Nutzer nach Job- oder Studienrichtungen fragt, analysiere sein Profil und schlage passende Optionen vor, die zu seiner Erfahrung und seinen Zielen passen.
+
 FORMATVORSCHLAG FÜR ANTWORTEN (falls sinnvoll):
 1) Kurze Einordnung / Ziel
 2) Konkrete Empfehlungen (Schritte)
@@ -49,7 +56,7 @@ FORMATVORSCHLAG FÜR ANTWORTEN (falls sinnvoll):
 4) Nächster Schritt (eine Frage oder To-do)
 
 STANDARD-ABLEHNUNG (außerhalb des Fokus) – nutze sinngemäß:
-"Ich bin auf Arbeitsmarkt, Bewerbungsprozess und Bildungslaufbahnen spezialisiert und kann bei [Thema außerhalb] leider nicht helfen. Wenn du möchtest, kann ich dir aber bei [relevante Alternativen] helfen. Magst du kurz sagen, ob es dir dabei um Jobwechsel, Bewerbung oder Weiterbildung geht?"
+"Ich bin auf Arbeitsmarkt, Bewerbungsprozess und Bildungslaufbahnen spezialisiert und kann bei [Thema außerhalb] leider nicht helfen. Wenn du möchtest, kann ich dir aber bei [relevante Alternativen] helfen. Magst du kurz sagen, ob es dir um Jobwechsel, Bewerbung oder Weiterbildung geht?"
 
 SPRACHE:
 - Antworte standardmäßig auf Deutsch (außer der/die Nutzer:in wünscht explizit eine andere Sprache).
@@ -121,19 +128,70 @@ function detectTopic(messages) {
       return res.status(400).json({ error: "messages required" });
     }
 
-    // Fetch user data for CV information
-    const user = await User.findById(req.userId).select("targetPosition cvText cvFile");
+    // Fetch user data for comprehensive profile information
+    const user = await User.findById(req.userId).select("-password -__v -createdAt");
     let userContext = "";
     if (user) {
-      if (user.targetPosition) {
-        userContext += `Der Nutzer bewirbt sich für die Position: ${user.targetPosition}. `;
+      userContext += "NUTZER-PROFIL:\n";
+      
+      // Basic information
+      if (user.name || user.surname) {
+        userContext += `Name: ${user.name || ""} ${user.surname || ""}\n`;
       }
+      
+      // Contact information
+      if (user.phone) userContext += `Telefon: ${user.phone}\n`;
+      if (user.email) userContext += `Email: ${user.email}\n`;
+      if (user.address || user.city || user.country || user.postalCode) {
+        userContext += `Adresse: ${user.address || ""}, ${user.city || ""} ${user.postalCode || ""}, ${user.country || ""}\n`;
+      }
+      
+      // Professional profiles
+      if (user.linkedin) userContext += `LinkedIn: ${user.linkedin}\n`;
+      if (user.github) userContext += `GitHub: ${user.github}\n`;
+      if (user.portfolio) userContext += `Portfolio: ${user.portfolio}\n`;
+      
+      // Career information
+      if (user.targetPosition) {
+        userContext += `Zielposition: ${user.targetPosition}\n`;
+      }
+      if (user.summary) {
+        userContext += `Zusammenfassung: ${user.summary}\n`;
+      }
+      
+      // Experience
+      if (user.experience && user.experience.length > 0) {
+        userContext += "\nBerufserfahrung:\n";
+        user.experience.forEach((exp, index) => {
+          userContext += `${index + 1}. ${exp.position} bei ${exp.company} (${exp.startDate} - ${exp.endDate || 'heute'})\n`;
+          if (exp.description) userContext += `   Beschreibung: ${exp.description}\n`;
+        });
+      }
+      
+      // Education
+      if (user.education && user.education.length > 0) {
+        userContext += "\nAusbildung:\n";
+        user.education.forEach((edu, index) => {
+          userContext += `${index + 1}. ${edu.degree} in ${edu.field} bei ${edu.institution} (${edu.startDate} - ${edu.endDate || 'heute'})\n`;
+          if (edu.gpa) userContext += `   Note: ${edu.gpa}\n`;
+        });
+      }
+      
+      // Skills and qualifications
+      if (user.skills) userContext += `\nSkills: ${user.skills}\n`;
+      if (user.languages) userContext += `Sprachen: ${user.languages}\n`;
+      if (user.certifications) userContext += `Zertifikate: ${user.certifications}\n`;
+      if (user.references) userContext += `Referenzen: ${user.references}\n`;
+      
+      // CV information
       if (user.cvText) {
-        userContext += `CV Informationen: ${user.cvText}. `;
+        userContext += `\nCV Text: ${user.cvText}\n`;
       }
       if (user.cvFile) {
-        userContext += `CV Datei verfügbar: ${user.cvFile}. `;
+        userContext += `CV Datei verfügbar: ${user.cvFile}\n`;
       }
+      
+      userContext += "\n=== ENDE DES NUTZER-PROFILS ===\n";
     }
 
     const conversationMessages = messages.map(m => ({ role: m.role, content: m.content }));
