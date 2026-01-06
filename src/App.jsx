@@ -30,6 +30,9 @@ export default function App() {
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
 
+  const [topic, setTopic] = useState("Other");
+
+
   const getHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
     "Content-Type": "application/json",
@@ -43,6 +46,7 @@ export default function App() {
   const newChat = () => {
     setConversationId(null);
     setMessages([]);
+    setTopic("Other");
   };
 
   const saveMessage = async (role, content) => {
@@ -74,6 +78,96 @@ useEffect(() => {
   }
 
 }, [user]);
+
+  async function handleUpload(file) {
+    if (loading) return;
+
+    // Ensure we have a conversationId (upload should be linked)
+    let convId = conversationId;
+    if (!convId) {
+      const res = await fetch("/api/conversations", { method: "POST", headers: getHeaders() });
+      const conv = await res.json();
+      convId = conv._id;
+      setConversationId(convId);
+    }
+
+    // Show info message in chat
+    const userMsg = { id: uid(), role: "user", content: `📎 Datei hochgeladen: ${file.name}` };
+    setMessages((prev) => [...prev, userMsg]);
+
+    // NOTE: saveMessage uses conversationId state; ensure it is set
+    await fetch(`/api/conversations/${convId}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({ role: "user", content: userMsg.content }),
+    });
+
+    setLoading(true);
+
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("conversationId", convId);
+      form.append("kind", "cv"); // MVP default
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: form,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const msg =
+          data?.message ||
+          data?.error ||
+          "Upload fehlgeschlagen (ungültiges Format oder Serverfehler).";
+        const botMsg = { id: uid(), role: "assistant", content: `⚠️ ${msg}` };
+        setMessages((prev) => [...prev, botMsg]);
+
+        await fetch(`/api/conversations/${convId}`, {
+          method: "PUT",
+          headers: getHeaders(),
+          body: JSON.stringify({ role: "assistant", content: botMsg.content }),
+        });
+        return;
+      }
+
+      const analysis = data?.analysisText || "Keine Analyse erhalten.";
+      const botMsg = {
+        id: uid(),
+        role: "assistant",
+        content: `✅ **Analyse (CV/Anschreiben)**\n\n${analysis}`,
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+
+      await fetch(`/api/conversations/${convId}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ role: "assistant", content: botMsg.content }),
+      });
+    } catch (e) {
+      const botMsg = {
+        id: uid(),
+        role: "assistant",
+        content: "⚠️ Upload/Analyse fehlgeschlagen (Network Error).",
+      };
+      setMessages((prev) => [...prev, botMsg]);
+
+      await fetch(`/api/conversations/${convId}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ role: "assistant", content: botMsg.content }),
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSend() {
     const text = input.trim();
     if (!text || loading) return;
@@ -105,6 +199,8 @@ useEffect(() => {
 
       const data = await res.json();
       const botText = data?.text || t('app.noResponse');
+
+      setTopic(data?.topic || "Other");
 
       const botMsg = { id: uid(), role: "assistant", content: botText };
       setMessages((prev) => [...prev, botMsg]);
@@ -178,6 +274,8 @@ useEffect(() => {
             setInput={setInput}
             loading={loading}
             onSend={handleSend}
+            topic={topic}
+            onUpload={handleUpload}
           />
         </div>
       </main>

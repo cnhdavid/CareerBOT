@@ -3,12 +3,14 @@ import { useTranslation } from "react-i18next";
 import { Paperclip, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ResourcesPanel from "./ResourcesPanel";
 import "./Chat.css";
 
-export default function Chat({ messages, input, setInput, loading, onSend }) {
+export default function Chat({ messages, input, setInput, loading, onSend, topic, onUpload }) {
   const { t } = useTranslation();
   const endRef = useRef(null);
   const scrollRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
   useEffect(() => {
@@ -59,8 +61,23 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
         </div>
       </div>
 
+      <ResourcesPanel topic={topic} />
+
       {/* Composer */}
       <div className="composerBar">
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          accept=".pdf,.docx,.txt"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onUpload?.(file);
+            e.target.value = ""; // reset so same file can be re-selected
+          }}
+        />
+
         <div className="composer">
           <textarea
             value={input}
@@ -71,7 +88,13 @@ export default function Chat({ messages, input, setInput, loading, onSend }) {
             disabled={loading}
           />
 
-          <button className="iconBtn" type="button" aria-label={t('chat.attachment')}>
+          <button
+            className="iconBtn"
+            type="button"
+            aria-label={t("chat.attachment")}
+            disabled={loading}
+            onClick={() => fileInputRef.current?.click()}
+          >
             <Paperclip size={18} />
           </button>
 

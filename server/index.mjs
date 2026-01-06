@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.mjs";
 import conversationRoutes from "./routes/conversations.mjs";
 import User from "./models/User.mjs";
 import { authenticateToken } from "./routes/auth.mjs";
+import uploadRoutes from "./routes/upload.mjs";
 
 const SYSTEM_PROMPT = `
 DU BIST: Ein spezialisierter Karriere- und Bildungs-Chatbot. Dein Themenfokus ist strikt begrenzt auf:
@@ -79,6 +80,9 @@ app.use("/api/auth", authRoutes);
 // Conversation routes
 app.use("/api/conversations", conversationRoutes);
 
+// Upload routes
+app.use("/api/upload", uploadRoutes);
+
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -88,6 +92,29 @@ app.get("/api/health", (req, res) => {
 });
 
 app.post("/api/answer", authenticateToken, async (req, res) => {
+function detectTopic(messages) {
+  const lastUser = [...messages].reverse().find(m => m.role === "user")?.content ?? "";
+  const text = lastUser.toLowerCase();
+
+  // lightweight keyword detection for MVP
+  if (/(software|programm|coding|code|entwickl|developer|it|informatik|data|ki|ai|cloud|devops|cyber|security|netzwerk|sql)/i.test(text)) {
+    return "IT";
+  }
+  if (/(medizin|pflege|arzt|ärztin|krankenhaus|patient|therapie|pharma)/i.test(text)) {
+    return "Medicine";
+  }
+  if (/(wirtschaft|business|bwl|management|marketing|sales|finance|controlling|startup)/i.test(text)) {
+    return "Business";
+  }
+  if (/(studium|uni|fh|hochschule|ausbildung|weiterbildung|zertifikat|kurs|bootcamp)/i.test(text)) {
+    return "Education";
+  }
+  if (/(bewerbung|lebenslauf|cv|anschreiben|interview|vorstellungsgespräch|assessment|gehaltsverhandlung|linkedin)/i.test(text)) {
+    return "Application";
+  }
+
+  return "Other";
+}
   try {
     const { messages } = req.body ?? {};
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -114,6 +141,8 @@ app.post("/api/answer", authenticateToken, async (req, res) => {
     const enhancedSystemPrompt = userContext
       ? `${SYSTEM_PROMPT}\n\nNUTZER-KONTEXT: ${userContext}`
       : SYSTEM_PROMPT;
+    
+    const topic = detectTopic(conversationMessages);
 
     const response = await client.chat.completions.create({
   model: process.env.OPENAI_MODEL || "gpt-4o-mini",
@@ -124,7 +153,7 @@ app.post("/api/answer", authenticateToken, async (req, res) => {
 });
 
 
-    res.json({ text: response.choices[0]?.message?.content ?? "" });
+    res.json({ text: response.choices[0]?.message?.content ?? "", topic });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "OpenAI request failed" });
