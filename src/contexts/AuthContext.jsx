@@ -5,42 +5,47 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
-  // Check for token on mount
+  // Check for disclaimer acceptance on mount
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      // Verify token and get user
-      fetch("/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => {
-          const contentType = res.headers.get("content-type");
-          if (res.ok && contentType && contentType.includes("application/json")) {
-            return res.json();
-          }
-          throw new Error("Token invalid");
-        })
-        .then((data) => {
-          setUser(data.user);
-        })
-        .catch(() => {
-          localStorage.removeItem("token");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
+    const hasAcceptedDisclaimer = localStorage.getItem("careerbot_disclaimer_accepted");
+    if (!hasAcceptedDisclaimer) {
+      setShowDisclaimer(true);
     }
+  }, []);
+
+  // Check for authentication on mount (cookies are handled automatically)
+  useEffect(() => {
+    // Verify authentication status by calling /me endpoint
+    fetch("/api/auth/me", {
+      credentials: 'include', // Important for sending cookies
+    })
+      .then((res) => {
+        const contentType = res.headers.get("content-type");
+        if (res.ok && contentType && contentType.includes("application/json")) {
+          return res.json();
+        }
+        throw new Error("Not authenticated");
+      })
+      .then((data) => {
+        setUser(data.user);
+      })
+      .catch((error) => {
+        console.error("Auth check error:", error);
+        // User is not authenticated, clear any local state
+        setUser(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const login = async (email, password) => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: 'include', // Important for receiving cookies
       body: JSON.stringify({ email, password }),
     });
 
@@ -55,7 +60,6 @@ export function AuthProvider({ children }) {
       throw new Error(data.error || "Login failed");
     }
 
-    localStorage.setItem("token", data.token);
     setUser(data.user);
     return data;
   };
@@ -64,6 +68,7 @@ export function AuthProvider({ children }) {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: 'include', // Important for receiving cookies
       body: JSON.stringify({ email, password }),
     });
 
@@ -78,15 +83,12 @@ export function AuthProvider({ children }) {
       throw new Error(data.error || "Signup failed");
     }
 
-    localStorage.setItem("token", data.token);
     setUser(data.user);
     return data;
   };
 
   const updateUser = async (userData) => {
-    const headers = {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    };
+    const headers = {};
     let body = userData;
     if (!(userData instanceof FormData)) {
       headers["Content-Type"] = "application/json";
@@ -94,6 +96,7 @@ export function AuthProvider({ children }) {
     }
     const res = await fetch("/api/auth/me", {
       method: "PUT",
+      credentials: 'include', // Important for sending cookies
       headers,
       body,
     });
@@ -113,9 +116,27 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: 'include', // Important for sending cookies
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+    }
+  };
+
+  const handleDisclaimerAccept = () => {
+    localStorage.setItem("careerbot_disclaimer_accepted", "true");
+    setShowDisclaimer(false);
+  };
+
+  const handleDisclaimerDecline = () => {
+    // Redirect away from the application or show a message
+    window.location.href = "about:blank";
   };
 
   const value = {
@@ -126,6 +147,9 @@ export function AuthProvider({ children }) {
     updateUser,
     logout,
     isAuthenticated: !!user,
+    showDisclaimer,
+    handleDisclaimerAccept,
+    handleDisclaimerDecline,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

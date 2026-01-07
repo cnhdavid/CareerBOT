@@ -8,9 +8,28 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 const upload = multer({ dest: 'uploads/' });
 
+// Cookie options for production-grade security
+const cookieOptions = {
+  httpOnly: true, // Prevents client-side JavaScript access
+  secure: process.env.NODE_ENV === 'production', // Only sent over HTTPS in production
+  sameSite: 'strict', // CSRF protection
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  path: '/'
+};
+
 // Generate JWT token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
+};
+
+// Set authentication cookie
+const setAuthCookie = (res, token) => {
+  res.cookie('auth_token', token, cookieOptions);
+};
+
+// Clear authentication cookie
+const clearAuthCookie = (res) => {
+  res.clearCookie('auth_token', { path: '/' });
 };
 
 // Signup route
@@ -55,10 +74,12 @@ router.post("/signup", async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+    
+    // Set HTTP-only secure cookie
+    setAuthCookie(res, token);
 
     res.status(201).json({
       message: "User created successfully",
-      token,
       user: {
         id: user._id,
         email: user.email,
@@ -150,10 +171,12 @@ router.post("/login", async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+    
+    // Set HTTP-only secure cookie
+    setAuthCookie(res, token);
 
     res.json({
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         email: user.email,
@@ -190,10 +213,16 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Verify token middleware (optional, for protected routes)
+// Verify token middleware (updated to check cookies first, then headers)
 export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+  // Check for token in cookie first (more secure)
+  let token = req.cookies?.auth_token;
+  
+  // Fallback to Authorization header for backward compatibility
+  if (!token) {
+    const authHeader = req.headers["authorization"];
+    token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+  }
 
   if (!token) {
     return res.status(401).json({ error: "Access token required" });
@@ -207,6 +236,12 @@ export const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+// Logout route
+router.post("/logout", (req, res) => {
+  clearAuthCookie(res);
+  res.json({ message: "Logout successful" });
+});
 
 // Get current user route (optional)
 router.get("/me", authenticateToken, async (req, res) => {

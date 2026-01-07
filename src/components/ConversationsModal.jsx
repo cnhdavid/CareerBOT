@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Edit3, Trash2, X, MessageSquare, Calendar } from "lucide-react";
 
 export default function ConversationsModal({ onClose, onLoadConversation }) {
   const { t } = useTranslation();
@@ -9,18 +10,26 @@ export default function ConversationsModal({ onClose, onLoadConversation }) {
   const [editName, setEditName] = useState("");
 
   const getHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
     "Content-Type": "application/json",
   });
 
   useEffect(() => {
-    fetch("/api/conversations", { headers: getHeaders() })
-      .then(res => res.json())
+    fetch("/api/conversations", { credentials: 'include' })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => {
-        setConversations(data);
+        setConversations(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((error) => {
+        console.error("Failed to load conversations:", error);
+        setConversations([]);
+        setLoading(false);
+      });
   }, []);
 
   const handleLoad = (conv) => {
@@ -32,6 +41,7 @@ export default function ConversationsModal({ onClose, onLoadConversation }) {
     try {
       const response = await fetch(`/api/conversations/${id}/name`, {
         method: "PATCH",
+        credentials: 'include',
         headers: getHeaders(),
         body: JSON.stringify({ name: newName }),
       });
@@ -56,7 +66,7 @@ export default function ConversationsModal({ onClose, onLoadConversation }) {
     try {
       const response = await fetch(`/api/conversations/${id}`, {
         method: "DELETE",
-        headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         setConversations(conversations.filter(conv => conv._id !== id));
@@ -86,7 +96,7 @@ export default function ConversationsModal({ onClose, onLoadConversation }) {
   };
 
   return (
-    <div className="settings-modal">
+    <div className="conversations-modal">
       <h2>{t('conversations.title', { defaultValue: 'Old Conversations' })}</h2>
 
       {loading ? (
@@ -98,33 +108,48 @@ export default function ConversationsModal({ onClose, onLoadConversation }) {
           {conversations.map(conv => (
             <div key={conv._id} className="conversation-item">
               <div className="conversation-content" onClick={() => handleLoad(conv)}>
-                {editingId === conv._id ? (
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onBlur={saveEdit}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveEdit();
-                      if (e.key === 'Escape') cancelEdit();
-                    }}
-                    autoFocus
-                  />
-                ) : (
-                  <div className="conversation-name">
-                    {conv.name || (conv.messages.length > 0 ? conv.messages[0].content.substring(0, 50) + '...' : 'Empty conversation')}
-                  </div>
-                )}
-                <div className="conversation-date">
-                  {new Date(conv.updatedAt).toLocaleDateString()}
+                <div className="conversation-header">
+                  <MessageSquare size={16} className="conversation-icon" />
+                  {editingId === conv._id ? (
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      onBlur={saveEdit}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveEdit();
+                        if (e.key === 'Escape') cancelEdit();
+                      }}
+                      autoFocus
+                      className="conversation-name-input"
+                    />
+                  ) : (
+                    <div className="conversation-name">
+                      {conv.name || (conv.messages.length > 0 ? conv.messages[0].content.substring(0, 50) + '...' : 'Empty conversation')}
+                    </div>
+                  )}
+                </div>
+                <div className="conversation-meta">
+                  <Calendar size={12} className="date-icon" />
+                  <span className="conversation-date">
+                    {new Date(conv.updatedAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
               <div className="conversation-actions">
-                <button onClick={() => startEditing(conv)} title="Rename">
-                  ✏️
+                <button 
+                  className="icon-btn"
+                  onClick={() => startEditing(conv)} 
+                  title="Rename"
+                >
+                  <Edit3 size={16} />
                 </button>
-                <button onClick={() => handleDelete(conv._id)} title="Delete">
-                  🗑️
+                <button 
+                  className="icon-btn danger"
+                  onClick={() => handleDelete(conv._id)} 
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>

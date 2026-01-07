@@ -22,6 +22,11 @@ const conversationSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  roomId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Room",
+    default: null,
+  },
   name: {
     type: String,
     default: "",
