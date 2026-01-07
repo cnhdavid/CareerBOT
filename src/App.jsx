@@ -3,24 +3,28 @@ import { useTranslation } from "react-i18next";
 import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
 import ConversationsModal from "./components/ConversationsModal";
+import RoomsModal from "./components/RoomsModal";
 import ProfileModal from "./components/ProfileModal";
 import Chat from "./components/Chat";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import OpenAIDisclaimer from "./components/OpenAIDisclaimer";
 import { useAuth } from "./contexts/AuthContext";
+import { sessionManager } from "./utils/sessionManager";
 import "./App.css";
 
 const uid = () => crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 
 export default function App() {
-  const { t } = useTranslation();
-  const { user, loading: authLoading } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { user, loading: authLoading, showDisclaimer, handleDisclaimerAccept, handleDisclaimerDecline } = useAuth();
   const [showLogin, setShowLogin] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showConversations, setShowConversations] = useState(false);
+  const [showRooms, setShowRooms] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState(() => sessionManager.getSetting('theme'));
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,38 +32,114 @@ export default function App() {
   // Chatverlauf
   const [messages, setMessages] = useState([]);
   const [conversationId, setConversationId] = useState(null);
+  const [currentRoomId, setCurrentRoomId] = useState(null);
   const [conversations, setConversations] = useState([]);
 
   const [topic, setTopic] = useState("Other");
 
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    sessionManager.updateSetting('theme', newTheme);
+  };
+
+  const handleLanguageChange = (language) => {
+    i18n.changeLanguage(language);
+    sessionManager.updateSetting('language', language);
+  };
+
 
   const getHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
     "Content-Type": "application/json",
   });
 
   const loadConversation = (conv) => {
+    console.log("🔄 Loading conversation:", {
+      conversationId: conv._id,
+      roomId: conv.roomId,
+      conversationName: conv.name,
+      messageCount: conv.messages?.length
+    });
+    
     setConversationId(conv._id);
+    setCurrentRoomId(conv.roomId || null);
     setMessages(conv.messages.map(m => ({ id: uid(), ...m })));
+    
+    // Save to localStorage for persistence
+    localStorage.setItem("currentConversationId", conv._id);
+    if (conv.roomId) {
+      localStorage.setItem("currentRoomId", conv.roomId);
+      console.log("✅ Set currentRoomId to:", conv.roomId);
+    } else {
+      localStorage.removeItem("currentRoomId");
+      console.log("⚠️ No roomId found in conversation object");
+    }
   };
 
   const newChat = () => {
     setConversationId(null);
+    setCurrentRoomId(null);
     setMessages([]);
     setTopic("Other");
+    
+    // Clear localStorage
+    localStorage.removeItem("currentConversationId");
+    localStorage.removeItem("currentRoomId");
+    
     // Close all open modals when going home
     setShowSettings(false);
     setShowConversations(false);
+    setShowRooms(false);
     setShowProfile(false);
   };
 
   const saveMessage = async (role, content) => {
-    if (!conversationId) return;
-    await fetch(`/api/conversations/${conversationId}`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({ role, content }),
-    });
+    if (!conversationId) {
+      console.log("❌ Cannot save message - no conversationId:", { role, content, conversationId });
+      return;
+    }
+    console.log("💾 Saving message:", { role, content, conversationId });
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}`, {
+        method: "PUT",
+        credentials: 'include',
+        headers: getHeaders(),
+        body: JSON.stringify({ role, content }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("❌ Failed to save message:", errorData);
+      } else {
+        console.log("✅ Message saved successfully");
+      }
+    } catch (error) {
+      console.error("❌ Error saving message:", error);
+    }
+  };
+
+  const saveMessageWithId = async (convId, role, content) => {
+    if (!convId) {
+      console.log("❌ Cannot save message - no convId:", { role, content, convId });
+      return;
+    }
+    console.log("💾 Saving message with ID:", { role, content, convId });
+    try {
+      const response = await fetch(`/api/conversations/${convId}`, {
+        method: "PUT",
+        credentials: 'include',
+        headers: getHeaders(),
+        body: JSON.stringify({ role, content }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("❌ Failed to save message:", errorData);
+      } else {
+        console.log("✅ Message saved successfully with ID");
+      }
+    } catch (error) {
+      console.error("❌ Error saving message with ID:", error);
+    }
   };
 useEffect(() => {
 
@@ -68,17 +148,44 @@ useEffect(() => {
 }, [theme]);
 
 useEffect(() => {
+  const savedLanguage = sessionManager.getSetting('language');
+  if (savedLanguage && i18n.language !== savedLanguage) {
+    i18n.changeLanguage(savedLanguage);
+  }
+}, [i18n]);
+
+useEffect(() => {
 
   if (user) {
-
-    // Do not create a conversation until the first message is sent
-
+    // Restore last active conversation from localStorage
+    const savedConversationId = localStorage.getItem("currentConversationId");
+    const savedRoomId = localStorage.getItem("currentRoomId");
+    
+    if (savedConversationId) {
+      // Load the saved conversation
+      fetch(`/api/conversations/${savedConversationId}`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(conv => {
+          if (conv && conv.userId === user._id) {
+            loadConversation(conv);
+            if (savedRoomId) {
+              setCurrentRoomId(savedRoomId);
+            }
+          }
+        })
+        .catch(() => {
+          // If loading fails, clear the saved IDs
+          localStorage.removeItem("currentConversationId");
+          localStorage.removeItem("currentRoomId");
+        });
+    }
   } else {
 
     setConversationId(null);
-
     setMessages([]);
-
+    setCurrentRoomId(null);
+    localStorage.removeItem("currentConversationId");
+    localStorage.removeItem("currentRoomId");
   }
 
 }, [user]);
@@ -89,10 +196,13 @@ useEffect(() => {
     // Ensure we have a conversationId (upload should be linked)
     let convId = conversationId;
     if (!convId) {
-      const res = await fetch("/api/conversations", { method: "POST", headers: getHeaders() });
+      const res = await fetch("/api/conversations", { method: "POST", credentials: 'include' });
       const conv = await res.json();
       convId = conv._id;
       setConversationId(convId);
+      // Save new conversation ID to localStorage
+      localStorage.setItem("currentConversationId", convId);
+      localStorage.removeItem("currentRoomId"); // New conversation has no room
     }
 
     // Show info message in chat
@@ -100,11 +210,7 @@ useEffect(() => {
     setMessages((prev) => [...prev, userMsg]);
 
     // NOTE: saveMessage uses conversationId state; ensure it is set
-    await fetch(`/api/conversations/${convId}`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({ role: "user", content: userMsg.content }),
-    });
+    await saveMessageWithId(convId, "user", userMsg.content);
 
     setLoading(true);
 
@@ -116,8 +222,9 @@ useEffect(() => {
 
       const res = await fetch("/api/upload", {
         method: "POST",
+        credentials: 'include',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
         },
         body: form,
       });
@@ -132,11 +239,7 @@ useEffect(() => {
         const botMsg = { id: uid(), role: "assistant", content: `⚠️ ${msg}` };
         setMessages((prev) => [...prev, botMsg]);
 
-        await fetch(`/api/conversations/${convId}`, {
-          method: "PUT",
-          headers: getHeaders(),
-          body: JSON.stringify({ role: "assistant", content: botMsg.content }),
-        });
+        await saveMessageWithId(convId, "assistant", botMsg.content);
         return;
       }
 
@@ -149,11 +252,7 @@ useEffect(() => {
 
       setMessages((prev) => [...prev, botMsg]);
 
-      await fetch(`/api/conversations/${convId}`, {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ role: "assistant", content: botMsg.content }),
-      });
+      await saveMessageWithId(convId, "assistant", botMsg.content);
     } catch (e) {
       const botMsg = {
         id: uid(),
@@ -162,11 +261,7 @@ useEffect(() => {
       };
       setMessages((prev) => [...prev, botMsg]);
 
-      await fetch(`/api/conversations/${convId}`, {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ role: "assistant", content: botMsg.content }),
-      });
+      await saveMessageWithId(convId, "assistant", botMsg.content);
     } finally {
       setLoading(false);
     }
@@ -179,25 +274,36 @@ useEffect(() => {
     setLoading(true);
     setInput("");
   
-    if (!conversationId) {
-      const res = await fetch("/api/conversations", { method: "POST", headers: getHeaders() });
+    let convId = conversationId;
+    if (!convId) {
+      const res = await fetch("/api/conversations", { method: "POST", credentials: 'include', headers: getHeaders() });
       const conv = await res.json();
-      setConversationId(conv._id);
+      convId = conv._id;
+      setConversationId(convId);
+      // Save new conversation ID to localStorage
+      localStorage.setItem("currentConversationId", convId);
+      localStorage.removeItem("currentRoomId"); // New conversation has no room
     }
   
     const userMsg = { id: uid(), role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
-    await saveMessage("user", text);
   
     try {
+      console.log("📤 Sending chat request:", {
+        messageCount: messages.length,
+        currentRoomId: currentRoomId,
+        conversationId: conversationId
+      });
+      
       const res = await fetch("/api/answer", {
         method: "POST",
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           messages: [...messages, userMsg],
+          roomId: currentRoomId,
         }),
       });
 
@@ -208,7 +314,10 @@ useEffect(() => {
 
       const botMsg = { id: uid(), role: "assistant", content: botText };
       setMessages((prev) => [...prev, botMsg]);
-      await saveMessage("assistant", botText);
+      
+      // Save both messages to the database
+      await saveMessageWithId(convId, "user", text);
+      await saveMessageWithId(convId, "assistant", botText);
     } catch (e) {
       setMessages((prev) => [
         ...prev,
@@ -218,7 +327,7 @@ useEffect(() => {
           content: t('app.networkError'),
         },
       ]);
-      await saveMessage("assistant", t('app.networkError'));
+      await saveMessageWithId(convId, "assistant", t('app.networkError'));
     } finally {
       setLoading(false);
     }
@@ -253,18 +362,27 @@ useEffect(() => {
         onClose={() => setSidebarOpen(false)}
         onSettings={() => {
           setShowConversations(false);
+          setShowRooms(false);
           setShowProfile(false);
           setShowSettings(true);
         }}
         onConversations={() => {
           setShowSettings(false);
+          setShowRooms(false);
           setShowProfile(false);
           setShowConversations(true);
+        }}
+        onRooms={() => {
+          setShowSettings(false);
+          setShowConversations(false);
+          setShowProfile(false);
+          setShowRooms(true);
         }}
         onNewChat={newChat}
         onProfile={() => {
           setShowSettings(false);
           setShowConversations(false);
+          setShowRooms(false);
           setShowProfile(true);
         }}
       />
@@ -301,7 +419,8 @@ useEffect(() => {
           <div className="overlay" onClick={() => setShowSettings(false)} />
           <SettingsModal
             theme={theme}
-            setTheme={setTheme}
+            setTheme={handleThemeChange}
+            onLanguageChange={handleLanguageChange}
             onClose={() => setShowSettings(false)}
           />
         </>
@@ -317,11 +436,29 @@ useEffect(() => {
         </>
       )}
 
+      {showRooms && (
+        <>
+          <div className="overlay" onClick={() => setShowRooms(false)} />
+          <RoomsModal
+            onClose={() => setShowRooms(false)}
+            onLoadConversation={loadConversation}
+            currentConversationId={conversationId}
+          />
+        </>
+      )}
+
       {showProfile && (
         <>
           <div className="overlay" onClick={() => setShowProfile(false)} />
           <ProfileModal onClose={() => setShowProfile(false)} />
         </>
+      )}
+
+      {showDisclaimer && (
+        <OpenAIDisclaimer 
+          onAccept={handleDisclaimerAccept}
+          onDecline={handleDisclaimerDecline}
+        />
       )}
     </div>
   );

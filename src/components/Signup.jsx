@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
+import { sessionManager } from "../utils/sessionManager";
 import "./Auth.css";
 
 export default function Signup({ onSwitchToLogin }) {
@@ -11,6 +12,20 @@ export default function Signup({ onSwitchToLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
+
+  useEffect(() => {
+    const theme = sessionManager.getSetting('theme');
+    document.documentElement.className = theme;
+
+    const cleanup = sessionManager.listenToSystemThemeChange((systemTheme) => {
+      const currentTheme = sessionManager.getSetting('theme');
+      if (!localStorage.getItem('careerbot_settings')) {
+        document.documentElement.className = systemTheme;
+      }
+    });
+
+    return cleanup;
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

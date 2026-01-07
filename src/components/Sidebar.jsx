@@ -12,7 +12,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function Sidebar({ open, onClose, onSettings, onConversations, onNewChat, onProfile }) {
+export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onNewChat, onProfile }) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   return (
@@ -41,12 +41,12 @@ export default function Sidebar({ open, onClose, onSettings, onConversations, on
           <span className="label">{t('sidebar.home')}</span>
         </button>
 
-        <button className="sidebar-item">
+        <button className="sidebar-item" onClick={(e) => e.preventDefault()}>
           <Compass size={18} />
           <span className="label">{t('sidebar.discover')}</span>
         </button>
 
-        <button className="sidebar-item">
+        <button className="sidebar-item" onClick={onRooms}>
           <Layers size={18} />
           <span className="label">{t('sidebar.rooms')}</span>
         </button>

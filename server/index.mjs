@@ -3,9 +3,11 @@ import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import multer from "multer";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./db.mjs";
 import authRoutes from "./routes/auth.mjs";
 import conversationRoutes from "./routes/conversations.mjs";
+import roomsRoutes from "./routes/rooms.mjs";
 import User from "./models/User.mjs";
 import { authenticateToken } from "./routes/auth.mjs";
 import uploadRoutes from "./routes/upload.mjs";
@@ -75,8 +77,14 @@ console.log("🔍 MONGODB_URI loaded:", process.env.MONGODB_URI ? "Yes" : "No");
 connectDB().catch(console.error);
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // Configure multer for file uploads
 const upload = multer({ dest: 'uploads/' });
@@ -86,6 +94,9 @@ app.use("/api/auth", authRoutes);
 
 // Conversation routes
 app.use("/api/conversations", conversationRoutes);
+
+// Rooms routes
+app.use("/api/rooms", roomsRoutes);
 
 // Upload routes
 app.use("/api/upload", uploadRoutes);
@@ -123,7 +134,13 @@ function detectTopic(messages) {
   return "Other";
 }
   try {
-    const { messages } = req.body ?? {};
+    const { messages, roomId } = req.body ?? {};
+    console.log("📥 Chat API request:", { 
+      messageCount: messages?.length, 
+      roomId: roomId,
+      userId: req.userId 
+    });
+    
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "messages required" });
     }

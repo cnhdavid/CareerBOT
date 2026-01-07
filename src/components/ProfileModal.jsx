@@ -191,9 +191,7 @@ export default function ProfileModal({ onClose }) {
       console.log('Starting CV analysis...');
       const response = await fetch('/api/analyze-cv', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem("token")}`
-        },
+        credentials: 'include',
         body: formData
       });
 
