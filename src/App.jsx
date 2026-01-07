@@ -47,6 +47,10 @@ export default function App() {
     setConversationId(null);
     setMessages([]);
     setTopic("Other");
+    // Close all open modals when going home
+    setShowSettings(false);
+    setShowConversations(false);
+    setShowProfile(false);
   };
 
   const saveMessage = async (role, content) => {
@@ -247,10 +251,22 @@ useEffect(() => {
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        onSettings={() => setShowSettings(true)}
-        onConversations={() => setShowConversations(true)}
+        onSettings={() => {
+          setShowConversations(false);
+          setShowProfile(false);
+          setShowSettings(true);
+        }}
+        onConversations={() => {
+          setShowSettings(false);
+          setShowProfile(false);
+          setShowConversations(true);
+        }}
         onNewChat={newChat}
-        onProfile={() => setShowProfile(true)}
+        onProfile={() => {
+          setShowSettings(false);
+          setShowConversations(false);
+          setShowProfile(true);
+        }}
       />
 
       <div className="topbar">
