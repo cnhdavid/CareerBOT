@@ -7,14 +7,26 @@ import {
   Sparkles,
   X,
   LogOut,
+  LogIn,
+  UserPlus,
   History
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onNewChat, onProfile }) {
+export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onNewChat, onProfile, onLogin, onSignup }) {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, isGuestMode, exitGuestMode } = useAuth();
+  
+  const handleLogin = () => {
+    exitGuestMode();
+    if (onLogin) onLogin();
+  };
+  
+  const handleSignup = () => {
+    exitGuestMode();
+    if (onSignup) onSignup();
+  };
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
 
@@ -60,22 +72,47 @@ export default function Sidebar({ open, onClose, onSettings, onConversations, on
 
       {/* BOTTOM */}
       <div className="sidebar-bottom">
-        <button className="sidebar-item" onClick={onProfile} style={{ gridTemplateColumns: "24px 1fr" }}>
-          <User size={18} />
-          <span className="label" style={{ fontSize: "12px" }}>
-            {user?.email}
-          </span>
-        </button>
+        {isGuestMode ? (
+          <>
+            <button className="sidebar-item" onClick={handleLogin} style={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              fontWeight: '600'
+            }}>
+              <LogIn size={18} />
+              <span className="label">{t('sidebar.login', { defaultValue: 'Login' })}</span>
+            </button>
 
-        <button className="sidebar-item" onClick={onSettings}>
-          <Settings size={18} />
-          <span className="label">{t('sidebar.settings')}</span>
-        </button>
+            <button className="sidebar-item" onClick={handleSignup}>
+              <UserPlus size={18} />
+              <span className="label">{t('sidebar.signup', { defaultValue: 'Sign Up' })}</span>
+            </button>
 
-        <button className="sidebar-item" onClick={logout}>
-          <LogOut size={18} />
-          <span className="label">{t('sidebar.logout')}</span>
-        </button>
+            <button className="sidebar-item" onClick={onSettings}>
+              <Settings size={18} />
+              <span className="label">{t('sidebar.settings')}</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="sidebar-item" onClick={onProfile} style={{ gridTemplateColumns: "24px 1fr" }}>
+              <User size={18} />
+              <span className="label" style={{ fontSize: "12px" }}>
+                {user?.email}
+              </span>
+            </button>
+
+            <button className="sidebar-item" onClick={onSettings}>
+              <Settings size={18} />
+              <span className="label">{t('sidebar.settings')}</span>
+            </button>
+
+            <button className="sidebar-item" onClick={logout}>
+              <LogOut size={18} />
+              <span className="label">{t('sidebar.logout')}</span>
+            </button>
+          </>
+        )}
       </div>
 
     </aside>

@@ -9,6 +9,8 @@ import Chat from "./components/Chat";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import OpenAIDisclaimer from "./components/OpenAIDisclaimer";
+import GuestModeIndicator from "./components/GuestModeIndicator";
+import SignupCTA from "./components/SignupCTA";
 import { useAuth } from "./contexts/AuthContext";
 import { sessionManager } from "./utils/sessionManager";
 import "./App.css";
@@ -17,7 +19,7 @@ const uid = () => crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 
 export default function App() {
   const { t, i18n } = useTranslation();
-  const { user, loading: authLoading, showDisclaimer, handleDisclaimerAccept, handleDisclaimerDecline } = useAuth();
+  const { user, loading: authLoading, isGuestMode, exitGuestMode, showDisclaimer, handleDisclaimerAccept, handleDisclaimerDecline } = useAuth();
   const [showLogin, setShowLogin] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -36,6 +38,10 @@ export default function App() {
   const [conversations, setConversations] = useState([]);
 
   const [topic, setTopic] = useState("Other");
+  
+  // Guest mode state
+  const [showSignupCTA, setShowSignupCTA] = useState(false);
+  const [guestMessageCount, setGuestMessageCount] = useState(0);
 
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
@@ -275,7 +281,8 @@ useEffect(() => {
     setInput("");
   
     let convId = conversationId;
-    if (!convId) {
+    // Only create conversation for authenticated users
+    if (!convId && !isGuestMode) {
       const res = await fetch("/api/conversations", { method: "POST", credentials: 'include', headers: getHeaders() });
       const conv = await res.json();
       convId = conv._id;
@@ -287,12 +294,27 @@ useEffect(() => {
   
     const userMsg = { id: uid(), role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
+    
+    // Track guest messages
+    if (isGuestMode) {
+      const newCount = guestMessageCount + 1;
+      setGuestMessageCount(newCount);
+      
+      // Show signup CTA after 3-5 messages (randomly between 3-5)
+      if (newCount >= 3 && newCount <= 5 && !showSignupCTA) {
+        const showAt = 3 + Math.floor(Math.random() * 3); // Random between 3-5
+        if (newCount === showAt) {
+          setShowSignupCTA(true);
+        }
+      }
+    }
   
     try {
       console.log("📤 Sending chat request:", {
         messageCount: messages.length,
         currentRoomId: currentRoomId,
-        conversationId: conversationId
+        conversationId: conversationId,
+        isGuestMode: isGuestMode
       });
       
       const res = await fetch("/api/answer", {
@@ -308,6 +330,20 @@ useEffect(() => {
       });
 
       const data = await res.json();
+      
+      // Handle rate limit for guests
+      if (res.status === 429 && data.limitReached) {
+        const botMsg = { 
+          id: uid(), 
+          role: "assistant", 
+          content: "⚠️ You've reached the guest message limit (10 messages). Please sign up to continue chatting with unlimited messages!" 
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setShowSignupCTA(true);
+        setLoading(false);
+        return;
+      }
+      
       const botText = data?.text || t('app.noResponse');
 
       setTopic(data?.topic || "Other");
@@ -315,9 +351,11 @@ useEffect(() => {
       const botMsg = { id: uid(), role: "assistant", content: botText };
       setMessages((prev) => [...prev, botMsg]);
       
-      // Save both messages to the database
-      await saveMessageWithId(convId, "user", text);
-      await saveMessageWithId(convId, "assistant", botText);
+      // Save both messages to the database (only for authenticated users)
+      if (!isGuestMode && convId) {
+        await saveMessageWithId(convId, "user", text);
+        await saveMessageWithId(convId, "assistant", botText);
+      }
     } catch (e) {
       setMessages((prev) => [
         ...prev,
@@ -327,7 +365,9 @@ useEffect(() => {
           content: t('app.networkError'),
         },
       ]);
-      await saveMessageWithId(convId, "assistant", t('app.networkError'));
+      if (!isGuestMode && convId) {
+        await saveMessageWithId(convId, "assistant", t('app.networkError'));
+      }
     } finally {
       setLoading(false);
     }
@@ -342,8 +382,8 @@ useEffect(() => {
     );
   }
 
-  // Show login/signup if not authenticated
-  if (!user) {
+  // Show login/signup if not authenticated and not in guest mode
+  if (!user && !isGuestMode) {
     return (
       <div className="app-root" style={{ display: "grid", placeItems: "center" }}>
         {showLogin ? (
@@ -355,8 +395,30 @@ useEffect(() => {
     );
   }
 
+  const handleSignupFromCTA = () => {
+    setShowSignupCTA(false);
+    exitGuestMode();
+    setShowLogin(false); // Show signup form
+  };
+
+  const handleDismissCTA = () => {
+    setShowSignupCTA(false);
+  };
+
+  const handleLoginFromSidebar = () => {
+    setSidebarOpen(false);
+    setShowLogin(true);
+  };
+
+  const handleSignupFromSidebar = () => {
+    setSidebarOpen(false);
+    setShowLogin(false);
+  };
+
   return (
     <div className="app-root">
+      {isGuestMode && <GuestModeIndicator />}
+      
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -385,6 +447,8 @@ useEffect(() => {
           setShowRooms(false);
           setShowProfile(true);
         }}
+        onLogin={handleLoginFromSidebar}
+        onSignup={handleSignupFromSidebar}
       />
 
       <div className="topbar">
@@ -458,6 +522,13 @@ useEffect(() => {
         <OpenAIDisclaimer 
           onAccept={handleDisclaimerAccept}
           onDecline={handleDisclaimerDecline}
+        />
+      )}
+
+      {showSignupCTA && (
+        <SignupCTA 
+          onSignup={handleSignupFromCTA}
+          onDismiss={handleDismissCTA}
         />
       )}
     </div>

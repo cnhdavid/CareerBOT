@@ -6,6 +6,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   // Check for disclaimer acceptance on mount
   useEffect(() => {
@@ -139,6 +140,16 @@ export function AuthProvider({ children }) {
     window.location.href = "about:blank";
   };
 
+  const enterGuestMode = () => {
+    setIsGuestMode(true);
+    setUser(null);
+    setLoading(false);
+  };
+
+  const exitGuestMode = () => {
+    setIsGuestMode(false);
+  };
+
   const value = {
     user,
     loading,
@@ -147,6 +158,9 @@ export function AuthProvider({ children }) {
     updateUser,
     logout,
     isAuthenticated: !!user,
+    isGuestMode,
+    enterGuestMode,
+    exitGuestMode,
     showDisclaimer,
     handleDisclaimerAccept,
     handleDisclaimerDecline,

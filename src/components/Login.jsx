@@ -10,7 +10,7 @@ export default function Login({ onSwitchToSignup }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, enterGuestMode } = useAuth();
 
   useEffect(() => {
     const theme = sessionManager.getSetting('theme');
@@ -38,6 +38,10 @@ export default function Login({ onSwitchToSignup }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGuestMode = () => {
+    enterGuestMode();
   };
 
   return (
@@ -76,6 +80,25 @@ export default function Login({ onSwitchToSignup }) {
           {loading ? t('login.loggingIn') : t('login.login')}
         </button>
       </form>
+
+      <button 
+        type="button" 
+        onClick={handleGuestMode} 
+        className="auth-guest-btn"
+        style={{
+          marginTop: '1rem',
+          width: '100%',
+          padding: '0.75rem',
+          backgroundColor: 'transparent',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '0.95rem',
+          color: 'var(--text-color)'
+        }}
+      >
+        🚀 Try as Guest
+      </button>
 
       <div className="auth-switch">
         <span>{t('login.noAccount')}</span>

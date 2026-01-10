@@ -4,12 +4,13 @@ import dotenv from "dotenv";
 import OpenAI from "openai";
 import multer from "multer";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import { connectDB } from "./db.mjs";
 import authRoutes from "./routes/auth.mjs";
 import conversationRoutes from "./routes/conversations.mjs";
 import roomsRoutes from "./routes/rooms.mjs";
 import User from "./models/User.mjs";
-import { authenticateToken } from "./routes/auth.mjs";
+import { authenticateToken, optionalAuth } from "./routes/auth.mjs";
 import uploadRoutes from "./routes/upload.mjs";
 
 const SYSTEM_PROMPT = `
@@ -86,6 +87,17 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'guest-session-secret-change-in-production',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
+
 // Configure multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
@@ -109,7 +121,7 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/answer", authenticateToken, async (req, res) => {
+// Helper function to detect topic from messages
 function detectTopic(messages) {
   const lastUser = [...messages].reverse().find(m => m.role === "user")?.content ?? "";
   const text = lastUser.toLowerCase();
@@ -133,22 +145,43 @@ function detectTopic(messages) {
 
   return "Other";
 }
+
+app.post("/api/answer", optionalAuth, async (req, res) => {
   try {
     const { messages, roomId } = req.body ?? {};
     console.log("📥 Chat API request:", { 
       messageCount: messages?.length, 
       roomId: roomId,
-      userId: req.userId 
+      userId: req.userId,
+      isGuest: req.isGuest 
     });
     
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "messages required" });
     }
 
-    // Fetch user data for comprehensive profile information
-    const user = await User.findById(req.userId).select("-password -__v -createdAt");
+    // Rate limiting for guest users
+    if (req.isGuest) {
+      if (!req.session.guestMessageCount) {
+        req.session.guestMessageCount = 0;
+      }
+      
+      req.session.guestMessageCount++;
+      
+      const MAX_GUEST_MESSAGES = 10;
+      if (req.session.guestMessageCount > MAX_GUEST_MESSAGES) {
+        return res.status(429).json({ 
+          error: "Guest message limit reached. Please sign up to continue chatting.",
+          limitReached: true
+        });
+      }
+    }
+
+    // Fetch user data for comprehensive profile information (only for authenticated users)
     let userContext = "";
-    if (user) {
+    if (!req.isGuest && req.userId) {
+      const user = await User.findById(req.userId).select("-password -__v -createdAt");
+      if (user) {
       userContext += "NUTZER-PROFIL:\n";
       
       // Basic information
@@ -209,6 +242,7 @@ function detectTopic(messages) {
       }
       
       userContext += "\n=== ENDE DES NUTZER-PROFILS ===\n";
+      }
     }
 
     const conversationMessages = messages.map(m => ({ role: m.role, content: m.content }));
@@ -220,13 +254,12 @@ function detectTopic(messages) {
     const topic = detectTopic(conversationMessages);
 
     const response = await client.chat.completions.create({
-  model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-  messages: [
-    { role: "system", content: enhancedSystemPrompt },
-    ...conversationMessages,
-  ],
-});
-
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      messages: [
+        { role: "system", content: enhancedSystemPrompt },
+        ...conversationMessages,
+      ],
+    });
 
     res.json({ text: response.choices[0]?.message?.content ?? "", topic });
   } catch (err) {

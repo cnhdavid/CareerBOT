@@ -237,6 +237,36 @@ export const authenticateToken = (req, res, next) => {
   });
 };
 
+// Optional authentication middleware - allows both authenticated and guest users
+export const optionalAuth = (req, res, next) => {
+  // Check for token in cookie first
+  let token = req.cookies?.auth_token;
+  
+  // Fallback to Authorization header
+  if (!token) {
+    const authHeader = req.headers["authorization"];
+    token = authHeader && authHeader.split(" ")[1];
+  }
+
+  if (token) {
+    // Try to verify token
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (!err) {
+        req.userId = decoded.userId;
+        req.isGuest = false;
+      } else {
+        // Invalid token, treat as guest
+        req.isGuest = true;
+      }
+      next();
+    });
+  } else {
+    // No token, treat as guest
+    req.isGuest = true;
+    next();
+  }
+};
+
 // Logout route
 router.post("/logout", (req, res) => {
   clearAuthCookie(res);
