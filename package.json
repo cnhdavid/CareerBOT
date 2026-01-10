@@ -6,13 +6,19 @@
   "scripts": {
     "dev": "concurrently \"npm:dev:client\" \"npm:dev:server\"",
     "dev:client": "vite",
-    "dev:server": "node server/index.mjs"
+    "dev:server": "node server/index.mjs",
+    "build": "vite build",
+    "vercel-build": "vite build"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "framer-motion": "^12.23.25",
     "i18next": "^25.7.3",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
-    "pdf-parse": "^2.4.5",
+    "mammoth": "^1.11.0",
+    "mongodb": "^6.3.0",
+    "pdf-parse": "^1.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.0",
