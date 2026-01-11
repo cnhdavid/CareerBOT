@@ -17,7 +17,6 @@ export default function Login({ onSwitchToSignup }) {
     document.documentElement.className = theme;
 
     const cleanup = sessionManager.listenToSystemThemeChange((systemTheme) => {
-      const currentTheme = sessionManager.getSetting('theme');
       if (!localStorage.getItem('careerbot_settings')) {
         document.documentElement.className = systemTheme;
       }

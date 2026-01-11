@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MessageSquare, Folder, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { getRoomContext, formatRoomContext, getConversationSummaries } from '../utils/roomContext';
 
@@ -8,13 +8,7 @@ export default function RoomContextViewer({ roomId, currentConversationId, token
   const [expanded, setExpanded] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
 
-  useEffect(() => {
-    if (roomId && token) {
-      fetchRoomContext();
-    }
-  }, [roomId, token]);
-
-  const fetchRoomContext = async () => {
+  const fetchRoomContext = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getRoomContext(roomId, token);
@@ -24,7 +18,13 @@ export default function RoomContextViewer({ roomId, currentConversationId, token
     } finally {
       setLoading(false);
     }
-  };
+  }, [roomId, token]);
+
+  useEffect(() => {
+    if (roomId && token) {
+      fetchRoomContext();
+    }
+  }, [roomId, token, fetchRoomContext]);
 
 
   if (loading) {

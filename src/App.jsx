@@ -11,7 +11,7 @@ import Signup from "./components/Signup";
 import OpenAIDisclaimer from "./components/OpenAIDisclaimer";
 import GuestModeIndicator from "./components/GuestModeIndicator";
 import SignupCTA from "./components/SignupCTA";
-import { useAuth } from "./contexts/AuthContext";
+import { useAuth } from "./hooks/useAuth";
 import { sessionManager } from "./utils/sessionManager";
 import "./App.css";
 
@@ -265,7 +265,7 @@ useEffect(() => {
       setMessages((prev) => [...prev, botMsg]);
 
       await saveMessageWithId(convId, "assistant", botMsg.content);
-    } catch (e) {
+    } catch (_e) {
       const botMsg = {
         id: uid(),
         role: "assistant",
@@ -362,7 +362,7 @@ useEffect(() => {
         await saveMessageWithId(convId, "user", text);
         await saveMessageWithId(convId, "assistant", botText);
       }
-    } catch (e) {
+    } catch (_e) {
       setMessages((prev) => [
         ...prev,
         {

@@ -12,7 +12,6 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
   const [editingRoomId, setEditingRoomId] = useState(null);
   const [editRoomName, setEditRoomName] = useState("");
   const [expandedRooms, setExpandedRooms] = useState(new Set());
-  const [showAllConversations, setShowAllConversations] = useState(false);
 
   const getHeaders = () => ({
     "Content-Type": "application/json",
