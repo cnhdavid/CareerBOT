@@ -1,24 +1,9 @@
-import express from "express";
-import multer from "multer";
-import mammoth from "mammoth";
-import { authenticateToken } from "./auth.mjs";
+import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import mammoth from "mammoth";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getCurrentUser } from "@/lib/auth";
 
-const router = express.Router();
-
-// Require auth (consistent with conversations)
-router.use(authenticateToken);
-
-// memory storage for MVP (no filesystem needed)
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
-});
-
-// Allowed formats
 const ALLOWED_EXT = new Set([".pdf", ".docx", ".txt"]);
 const ALLOWED_MIME = new Set([
   "application/pdf",
@@ -51,19 +36,19 @@ async function extractPdfText(buffer) {
   return fullText;
 }
 
-async function extractText(file) {
-  const ext = getExt(file.originalname);
+async function extractText(file, buffer) {
+  const ext = getExt(file.name);
 
   if (ext === ".txt") {
-    return file.buffer.toString("utf-8");
+    return buffer.toString("utf-8");
   }
 
   if (ext === ".pdf") {
-  return await extractPdfText(file.buffer);
+    return await extractPdfText(buffer);
   }
 
   if (ext === ".docx") {
-    const result = await mammoth.extractRawText({ buffer: file.buffer });
+    const result = await mammoth.extractRawText({ buffer });
     return result.value || "";
   }
 
@@ -89,34 +74,56 @@ ${text.slice(0, 12000)}
 `.trim();
 }
 
-router.post("/", upload.single("file"), async (req, res) => {
+export async function POST(request) {
   try {
-    const { conversationId, kind } = req.body ?? {};
+    const userId = await getCurrentUser();
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Access token required" },
+        { status: 401 }
+      );
+    }
+
+    const formData = await request.formData();
+    const conversationId = formData.get('conversationId');
+    const kind = formData.get('kind');
+    const file = formData.get('file');
+
     if (!conversationId) {
-      return res.status(400).json({ error: "conversationId required" });
+      return NextResponse.json(
+        { error: "conversationId required" },
+        { status: 400 }
+      );
     }
 
-    if (!req.file) {
-      return res.status(400).json({ error: "file required" });
+    if (!file) {
+      return NextResponse.json(
+        { error: "file required" },
+        { status: 400 }
+      );
     }
 
-    const ext = getExt(req.file.originalname);
-    const mime = req.file.mimetype;
+    const ext = getExt(file.name);
+    const mime = file.type;
 
     if (!ALLOWED_EXT.has(ext) || !ALLOWED_MIME.has(mime)) {
-      return res.status(400).json({
+      return NextResponse.json({
         error: "unsupported_file_type",
         message: "Nur PDF, DOCX oder TXT sind erlaubt.",
         received: { ext, mime },
-      });
+      }, { status: 400 });
     }
 
-    const extracted = (await extractText(req.file)).trim();
+    const fileBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(fileBuffer);
+
+    const extracted = (await extractText(file, buffer)).trim();
     if (!extracted) {
-      return res.status(400).json({
+      return NextResponse.json({
         error: "empty_text",
         message: "Konnte keinen Text aus der Datei extrahieren.",
-      });
+      }, { status: 400 });
     }
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -137,26 +144,21 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     const analysisText = completion.choices[0]?.message?.content ?? "";
 
-    return res.json({
+    return NextResponse.json({
       ok: true,
       analysisText,
       meta: {
-        filename: req.file.originalname,
+        filename: file.name,
         mime,
-        size: req.file.size,
+        size: file.size,
         kind: kind || "cv",
       },
     });
   } catch (err) {
     console.error("Upload/analyze error:", err);
-    if (err?.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({
-        error: "file_too_large",
-        message: "Datei ist zu groß (max. 5MB).",
-      });
-    }
-    res.status(500).json({ error: "upload_failed" });
+    return NextResponse.json(
+      { error: "upload_failed" },
+      { status: 500 }
+    );
   }
-});
-
-export default router;
+}

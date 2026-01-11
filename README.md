@@ -1,71 +1,87 @@
 # CareerBOT
 
-A React + Vite career guidance application with MongoDB authentication and OpenAI integration.
+AI-powered career guidance chatbot built with Next.js, React, and OpenAI.
 
-## Features
+## 🚀 Features
 
-- **AI-Powered Career Guidance**: Personalized advice using OpenAI's advanced language models
-- **Secure Authentication**: Industry-standard HTTP-only secure cookies
-- **CV Analysis**: Upload and analyze resumes/CVs for automatic profile population
-- **Profile Management**: Comprehensive career profile with experience, education, and skills
-- **Conversation History**: Persistent chat history with conversation management
-- **Room Organization**: Group conversations into themed rooms
-- **Dark/Light Theme**: Responsive design with theme switching
+- **AI-Powered Career Guidance**: Personalized advice using OpenAI GPT-4o-mini
+- **Guest Mode**: Try the chatbot without signing up
+- **Secure Authentication**: JWT-based auth with HTTP-only cookies
+- **CV Analysis**: Upload and analyze resumes (PDF, DOCX, TXT)
+- **Profile Management**: Comprehensive career profile with experience and education
+- **Conversation Management**: Save and organize chat history
+- **Room System**: Group related conversations together
+- **File Upload**: Document analysis with AI feedback
+- **Multi-language Support**: i18n (German/English)
+- **Theme Support**: Dark/light mode with system preference detection
 - **Mobile Responsive**: Optimized for all device sizes
-- **Data Privacy**: Transparent AI usage disclaimer and privacy controls
+- **SSR Ready**: Server-side rendering with Next.js
 
-## Setup
+## 📋 Prerequisites
+
+- Node.js 18+ 
+- MongoDB Atlas account (free tier works)
+- OpenAI API key
+
+## 🛠️ Setup
 
 ### 1. Install Dependencies
 
 ```bash
 npm install
-cd server
-npm install
 ```
 
-### 2. Configure Environment
+### 2. Configure Environment Variables
 
-Create a `.env` file in the `server` directory:
+Create a `.env.local` file in the **root directory**:
 
 ```env
 # Database Configuration
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/careerbot?retryWrites=true&w=majority
 
-# Authentication Configuration
-JWT_SECRET=your-secret-key-change-in-production
+# Authentication Secrets (generate random strings)
+JWT_SECRET=your-secret-key-change-in-production-min-32-chars
+SESSION_SECRET=guest-session-secret-change-in-production
 
 # OpenAI Configuration
-OPENAI_API_KEY=your-openai-api-key
+OPENAI_API_KEY=sk-your-openai-api-key
 OPENAI_MODEL=gpt-4o-mini
 
-# Optional: Client URL for CORS (defaults to http://localhost:5173)
-CLIENT_URL=http://localhost:5173
+# Environment
+NODE_ENV=development
 ```
 
-**To get your MongoDB connection string:**
-- Go to MongoDB Atlas
-- Click "Connect" on your cluster
-- Choose "Connect your application"
-- Copy connection string
-- Replace `<password>` with your database password
-- Replace `<database-name>` with your database name (e.g., `careerbot`)
+**Important Notes:**
+- File must be named `.env.local` (not `.env`)
+- Must be in the root directory (not in a `server/` folder)
+- Replace `<password>` in MongoDB URI with your actual password
+- Generate strong secrets: `openssl rand -base64 32`
 
-**To get your OpenAI API key:**
-- Go to [OpenAI Platform](https://platform.openai.com/)
-- Navigate to API Keys
-- Create a new API key
-- Copy the key for use in `.env`
+**Getting Your Credentials:**
 
-### 3. Run Application
+**MongoDB Atlas:**
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a free cluster
+3. Click "Connect" → "Connect your application"
+4. Copy connection string
+5. Replace `<password>` with your database password
+6. Add your IP to Network Access (or use `0.0.0.0/0` for development)
 
-From the root directory:
+**OpenAI API Key:**
+1. Go to [OpenAI Platform](https://platform.openai.com/)
+2. Navigate to API Keys
+3. Create new secret key
+4. Copy the key (starts with `sk-`)
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-This will start both the frontend (Vite) and backend (Express) servers.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+**Note:** The app runs on port 3000 (not 5173). All API routes are at `/api/*`.
 
 ## Authentication & Security
 
@@ -98,46 +114,233 @@ CareerBOT uses OpenAI's API for:
 - File uploads analyzed for content extraction
 - No sensitive personal data stored unnecessarily
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-careerbot/
-├── src/                          # React frontend
-│   ├── components/                 # React components
-│   │   ├── Login.jsx
-│   │   ├── Signup.jsx
+CareerBOT/
+├── app/                          # Next.js App Router
+│   ├── api/                      # API Routes (Backend)
+│   │   ├── auth/                # Authentication endpoints
+│   │   │   ├── signup/route.js
+│   │   │   ├── login/route.js
+│   │   │   ├── logout/route.js
+│   │   │   └── me/route.js
+│   │   ├── conversations/       # Conversation management
+│   │   ├── rooms/              # Room management
+│   │   ├── answer/route.js     # Chat AI endpoint
+│   │   ├── analyze-cv/route.js # CV analysis
+│   │   └── upload/route.js     # File upload
+│   ├── globals.css             # Global styles
+│   ├── layout.js               # Root layout with providers
+│   └── page.js                 # Home page
+├── lib/                         # Shared utilities
+│   ├── models/                 # Mongoose models
+│   │   ├── User.js
+│   │   ├── Conversation.js
+│   │   └── Room.js
+│   ├── db.js                   # Database connection
+│   ├── auth.js                 # Auth utilities
+│   └── constants.js            # System prompts
+├── src/                         # React components
+│   ├── components/             # UI components
 │   │   ├── Chat.jsx
-│   │   ├── OpenAIDisclaimer.jsx
+│   │   ├── Login.jsx
+│   │   ├── Sidebar.jsx
 │   │   └── ...
-│   ├── contexts/                   # React contexts
+│   ├── contexts/               # React contexts
 │   │   └── AuthContext.jsx
-│   └── utils/                      # Utility functions
-└── server/                        # Express backend
-    ├── models/                     # MongoDB models
-    │   └── User.mjs
-    ├── routes/                      # API routes
-    │   ├── auth.mjs
-    │   ├── conversations.mjs
-    │   └── rooms.mjs
-    ├── db.mjs                     # Database connection
-    └── index.mjs                   # Main server file
+│   ├── hooks/                  # Custom hooks
+│   └── utils/                  # Utility functions
+├── public/                      # Static assets
+├── .env.local                  # Environment variables
+├── next.config.js              # Next.js configuration
+├── package.json                # Dependencies
+├── tailwind.config.js          # Tailwind CSS config
+└── vercel.json                 # Vercel deployment config
 ```
 
-## Development
+## 🔌 API Routes
+
+All API routes are accessible at `/api/*`:
+
+### Authentication
+- `POST /api/auth/signup` - Create new account
+- `POST /api/auth/login` - Login with email/password
+- `POST /api/auth/logout` - Logout and clear session
+- `GET /api/auth/me` - Get current user (supports guest mode)
+- `PUT /api/auth/me` - Update user profile
+
+### Conversations
+- `GET /api/conversations` - List all conversations
+- `POST /api/conversations` - Create new conversation
+- `GET /api/conversations/[id]` - Get specific conversation
+- `PUT /api/conversations/[id]` - Add message to conversation
+- `DELETE /api/conversations/[id]` - Delete conversation
+- `PATCH /api/conversations/[id]/name` - Update conversation name
+
+### Chat & Analysis
+- `POST /api/answer` - Send message to AI (supports guest mode)
+- `POST /api/upload` - Upload and analyze document
+- `POST /api/analyze-cv` - Analyze CV/resume
+
+### Rooms
+- `GET /api/rooms` - List all rooms
+- `POST /api/rooms` - Create new room
+
+## 🚀 Deployment to Vercel
+
+### Quick Deploy
+
+1. **Push to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Import to Vercel:**
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Import your GitHub repository
+   - Vercel auto-detects Next.js
+
+3. **Add Environment Variables:**
+   In Vercel dashboard, add:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `SESSION_SECRET`
+   - `OPENAI_API_KEY`
+   - `OPENAI_MODEL` (set to `gpt-4o-mini`)
+   - `NODE_ENV` (set to `production`)
+
+4. **Deploy:**
+   Click "Deploy" and Vercel will build and deploy your app
+
+### Continuous Deployment
+
+Every push to `main` automatically deploys to production.
+Pull requests get preview deployments.
+
+### Custom Domain (Optional)
+
+1. Go to Vercel project → Settings → Domains
+2. Add your custom domain
+3. Update DNS records as instructed
+4. SSL certificate is automatically provisioned
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+npm run dev      # Start development server (port 3000)
+npm run build    # Build for production
+npm start        # Start production server
+npm run lint     # Run ESLint
+```
+
+### Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Frontend**: React 19, Framer Motion
+- **Backend**: Next.js API Routes
+- **Database**: MongoDB with Mongoose
+- **AI**: OpenAI GPT-4o-mini
+- **Auth**: JWT with HTTP-only cookies
+- **Styling**: Tailwind CSS
+- **Deployment**: Vercel
 
 ### Environment Variables
-- `NODE_ENV`: Set to 'production' for production security settings
-- `CLIENT_URL`: Frontend URL for CORS configuration
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `JWT_SECRET` | Yes | Secret for JWT tokens (min 32 chars) |
+| `SESSION_SECRET` | Yes | Secret for sessions |
+| `OPENAI_API_KEY` | Yes | OpenAI API key |
+| `OPENAI_MODEL` | No | OpenAI model (default: gpt-4o-mini) |
+| `NODE_ENV` | No | Environment (development/production) |
 
 ### Security Notes
-- JWT secret should be changed in production
-- Use HTTPS in production for secure cookies
-- Regularly update dependencies for security patches
-- Monitor OpenAI API usage and costs
 
-## Privacy & Compliance
+- JWT and session secrets should be strong random strings
+- Use HTTPS in production for secure cookies
+- MongoDB IP whitelist should include Vercel IPs in production
+- Regularly update dependencies for security patches
+- Monitor OpenAI API usage and set spending limits
+
+## 🧪 Testing
+
+### Test Authentication
+
+```bash
+# Signup
+curl -X POST http://localhost:3000/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}'
+
+# Login
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}'
+
+# Get current user
+curl http://localhost:3000/api/auth/me
+```
+
+### Test Chat
+
+```bash
+curl -X POST http://localhost:3000/api/answer \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Hello"}]}'
+```
+
+## 🐛 Troubleshooting
+
+### MongoDB Connection Issues
+- Verify `.env.local` exists in root directory
+- Check `MONGODB_URI` doesn't contain `<db_password>` placeholder
+- Whitelist your IP in MongoDB Atlas Network Access
+
+### API Routes Return 404
+- Ensure files are in `app/api/` directory
+- File names must be `route.js` (not `index.js`)
+- Restart dev server: `npm run dev`
+
+### Build Errors
+```bash
+# Clear Next.js cache
+Remove-Item -Path ".next" -Recurse -Force
+npm run build
+```
+
+### localStorage Errors
+All browser API access is protected with `typeof window !== 'undefined'` checks.
+If you see localStorage errors, ensure components using it are client components.
+
+## 📝 Privacy & Compliance
 
 - **AI Usage Disclaimer**: Users must consent before using AI features
-- **Data Rights**: Users can delete, export, or modify their data
-- **Transparent Processing**: Clear explanation of how AI processes user data
-- **Minimal Data Collection**: Only collect necessary information for service functionality
+- **Guest Mode**: Try features without creating an account
+- **Data Rights**: Users can view, update, or delete their data
+- **Transparent Processing**: Clear explanation of how AI processes data
+- **Minimal Data Collection**: Only collect necessary information
+- **Secure Storage**: Passwords hashed with bcrypt, sensitive data encrypted
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🙏 Acknowledgments
+
+- OpenAI for GPT API
+- Vercel for hosting platform
+- MongoDB Atlas for database
+- Next.js team for the framework
+
+## 📞 Support
+
+For issues and questions:
+- Check troubleshooting section above
+- Review Next.js documentation
+- Open an issue on GitHub

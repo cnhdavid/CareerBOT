@@ -26,7 +26,7 @@ export default function App() {
   const [showConversations, setShowConversations] = useState(false);
   const [showRooms, setShowRooms] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [theme, setTheme] = useState(() => sessionManager.getSetting('theme'));
+  const [theme, setTheme] = useState('dark');
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -147,10 +147,16 @@ export default function App() {
       console.error("❌ Error saving message with ID:", error);
     }
   };
+// Load theme from localStorage on client-side mount
 useEffect(() => {
+  const savedTheme = sessionManager.getSetting('theme');
+  if (savedTheme) {
+    setTheme(savedTheme);
+  }
+}, []);
 
+useEffect(() => {
   document.documentElement.className = theme;
-
 }, [theme]);
 
 useEffect(() => {

@@ -15,6 +15,9 @@ class SessionManager {
   }
 
   getSettings() {
+    if (typeof window === 'undefined') {
+      return this.DEFAULT_SETTINGS;
+    }
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
@@ -28,6 +31,9 @@ class SessionManager {
   }
 
   saveSettings(settings) {
+    if (typeof window === 'undefined') {
+      return null;
+    }
     try {
       const currentSettings = this.getSettings();
       const updatedSettings = { ...currentSettings, ...settings };
@@ -49,6 +55,9 @@ class SessionManager {
   }
 
   clearSettings() {
+    if (typeof window === 'undefined') {
+      return false;
+    }
     try {
       localStorage.removeItem(this.STORAGE_KEY);
       return true;

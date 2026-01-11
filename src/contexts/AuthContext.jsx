@@ -10,9 +10,11 @@ export function AuthProvider({ children }) {
 
   // Check for disclaimer acceptance on mount
   useEffect(() => {
-    const hasAcceptedDisclaimer = localStorage.getItem("careerbot_disclaimer_accepted");
-    if (!hasAcceptedDisclaimer) {
-      setShowDisclaimer(true);
+    if (typeof window !== 'undefined') {
+      const hasAcceptedDisclaimer = localStorage.getItem("careerbot_disclaimer_accepted");
+      if (!hasAcceptedDisclaimer) {
+        setShowDisclaimer(true);
+      }
     }
   }, []);
 
@@ -131,13 +133,16 @@ export function AuthProvider({ children }) {
   };
 
   const handleDisclaimerAccept = () => {
-    localStorage.setItem("careerbot_disclaimer_accepted", "true");
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("careerbot_disclaimer_accepted", "true");
+    }
     setShowDisclaimer(false);
   };
 
   const handleDisclaimerDecline = () => {
-    // Redirect away from the application or show a message
-    window.location.href = "about:blank";
+    if (typeof window !== 'undefined') {
+      window.location.href = "about:blank";
+    }
   };
 
   const enterGuestMode = () => {
