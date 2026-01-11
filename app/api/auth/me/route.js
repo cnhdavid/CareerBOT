@@ -75,21 +75,25 @@ export async function PUT(request) {
 
     await connectDB();
 
-    const formData = await request.formData();
+    // Parse JSON body instead of FormData
+    const data = await request.json();
     const updateData = {};
 
+    console.log('[Profile Update] Received data:', Object.keys(data));
+
     const fields = [
-      'email', 'password', 'name', 'surname', 'birthday', 'targetPosition', 'cvText',
+      'email', 'password', 'name', 'surname', 'birthday', 'targetPosition', 'cvText', 'cvFile',
       'phone', 'address', 'city', 'country', 'postalCode', 'linkedin', 'github', 
       'portfolio', 'summary', 'skills', 'languages', 'certifications', 'references'
     ];
 
     fields.forEach(field => {
-      const value = formData.get(field);
-      if (value !== null && value !== undefined) {
+      const value = data[field];
+      if (value !== null && value !== undefined && value !== '') {
         if (field === 'birthday' && value) {
           updateData[field] = new Date(value);
         } else if (field === 'password' && value === '') {
+          // Skip empty password
           return;
         } else {
           updateData[field] = value;
@@ -97,28 +101,36 @@ export async function PUT(request) {
       }
     });
 
-    const experience = formData.get('experience');
-    if (experience) {
-      updateData.experience = JSON.parse(experience);
+    // Handle experience - already parsed JSON from frontend
+    if (data.experience) {
+      if (typeof data.experience === 'string') {
+        updateData.experience = JSON.parse(data.experience);
+      } else {
+        updateData.experience = data.experience;
+      }
     }
 
-    const education = formData.get('education');
-    if (education) {
-      updateData.education = JSON.parse(education);
+    // Handle education - already parsed JSON from frontend
+    if (data.education) {
+      if (typeof data.education === 'string') {
+        updateData.education = JSON.parse(data.education);
+      } else {
+        updateData.education = data.education;
+      }
     }
 
-    const cvFile = formData.get('cvFile');
-    if (cvFile && cvFile.size > 0) {
-      updateData.cvFile = cvFile.name;
-    }
+    console.log('[Profile Update] Update data fields:', Object.keys(updateData));
 
     const user = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-password");
     if (!user) {
+      console.log('[Profile Update] User not found:', userId);
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
       );
     }
+
+    console.log('[Profile Update] Profile updated successfully');
 
     return NextResponse.json({
       message: "Profile updated successfully",
@@ -149,7 +161,9 @@ export async function PUT(request) {
       },
     });
   } catch (error) {
-    console.error("Update user error:", error);
+    console.error('[Profile Update] Error:', error);
+    console.error('[Profile Update] Error stack:', error.stack);
+    
     if (error.name === "ValidationError") {
       const validationMessages = Object.values(error.errors || {}).map(e => e.message).join(", ");
       return NextResponse.json(
@@ -164,7 +178,7 @@ export async function PUT(request) {
       );
     }
     return NextResponse.json(
-      { error: "Error updating user" },
+      { error: `Error updating user: ${error.message}` },
       { status: 500 }
     );
   }

@@ -180,7 +180,12 @@ export default function ProfileModal({ onClose }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    console.log('CV file selected:', file.name);
+    console.log('[Frontend] CV file selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+    
     setCvUploadLoading(true);
     setError("");
 
@@ -188,23 +193,38 @@ export default function ProfileModal({ onClose }) {
       const formData = new FormData();
       formData.append('cvFile', file);
 
-      console.log('Starting CV analysis...');
+      console.log('[Frontend] Starting CV analysis request to /api/analyze-cv');
       const response = await fetch('/api/analyze-cv', {
         method: 'POST',
         credentials: 'include',
         body: formData
       });
 
+      console.log('[Frontend] Response status:', response.status);
+      
       const result = await response.json();
-      console.log('CV analysis result:', result);
+      console.log('[Frontend] CV analysis result:', result);
+
+      if (!response.ok) {
+        console.error('[Frontend] API request failed with status:', response.status);
+        const errorMessage = result.error || `Server error: ${response.status}`;
+        setError(errorMessage);
+        return;
+      }
 
       if (result.success) {
-        console.log('Populating form with extracted data...');
-        // Populate form with extracted data - CV data has priority over existing data
+        console.log('[Frontend] Populating form with extracted data...');
         const extractedData = result.data;
+        
+        console.log('[Frontend] Extracted data preview:', {
+          name: extractedData.name,
+          surname: extractedData.surname,
+          experienceCount: extractedData.experience?.length || 0,
+          educationCount: extractedData.education?.length || 0
+        });
+        
         setFormData(prev => ({
           ...prev,
-          // Always use CV data, even if empty (to clear non-CV fields)
           name: extractedData.name || "",
           surname: extractedData.surname || "",
           phone: extractedData.phone || "",
@@ -217,11 +237,9 @@ export default function ProfileModal({ onClose }) {
           portfolio: extractedData.portfolio || "",
           summary: extractedData.summary || "",
           targetPosition: extractedData.targetPosition || "",
-          // Use CV experience if available, otherwise empty array
           experience: extractedData.experience && extractedData.experience.length > 0 
             ? extractedData.experience 
             : [],
-          // Use CV education if available, otherwise empty array  
           education: extractedData.education && extractedData.education.length > 0
             ? extractedData.education
             : [],
@@ -230,10 +248,11 @@ export default function ProfileModal({ onClose }) {
           certifications: extractedData.certifications || "",
           references: extractedData.references || ""
         }));
-        console.log('Form populated successfully!');
+        console.log('[Frontend] Form populated successfully!');
         
         // Auto-save the CV data to database
         try {
+          console.log('[Frontend] Auto-saving CV data to database...');
           const saveData = {
             name: extractedData.name || "",
             surname: extractedData.surname || "",
@@ -256,21 +275,20 @@ export default function ProfileModal({ onClose }) {
           };
           
           await updateUser(saveData);
-          console.log('CV data automatically saved to database');
+          console.log('[Frontend] CV data automatically saved to database');
         } catch (saveError) {
-          console.error('Auto-save failed:', saveError);
-          // Don't show error to user since form is populated, but log it
+          console.error('[Frontend] Auto-save failed:', saveError);
         }
       } else {
-        console.error('CV analysis failed:', result.error);
+        console.error('[Frontend] CV analysis failed:', result.error);
         setError(result.error || "Failed to analyze CV");
       }
     } catch (err) {
-      console.error('CV upload error:', err);
-      setError("Error uploading CV. Please try again.");
+      console.error('[Frontend] CV upload error:', err);
+      console.error('[Frontend] Error details:', err.message);
+      setError(`Error uploading CV: ${err.message}. Please try again.`);
     } finally {
       setCvUploadLoading(false);
-      // Clear the file input
       e.target.value = '';
     }
   };
