@@ -35,7 +35,6 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [conversationId, setConversationId] = useState(null);
   const [currentRoomId, setCurrentRoomId] = useState(null);
-  const [conversations, setConversations] = useState([]);
 
   const [topic, setTopic] = useState("Other");
   
@@ -96,31 +95,6 @@ export default function App() {
     setShowConversations(false);
     setShowRooms(false);
     setShowProfile(false);
-  };
-
-  const saveMessage = async (role, content) => {
-    if (!conversationId) {
-      console.log("❌ Cannot save message - no conversationId:", { role, content, conversationId });
-      return;
-    }
-    console.log("💾 Saving message:", { role, content, conversationId });
-    try {
-      const response = await fetch(`/api/conversations/${conversationId}`, {
-        method: "PUT",
-        credentials: 'include',
-        headers: getHeaders(),
-        body: JSON.stringify({ role, content }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("❌ Failed to save message:", errorData);
-      } else {
-        console.log("✅ Message saved successfully");
-      }
-    } catch (error) {
-      console.error("❌ Error saving message:", error);
-    }
   };
 
   const saveMessageWithId = async (convId, role, content) => {
