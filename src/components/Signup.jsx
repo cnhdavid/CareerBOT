@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { sessionManager } from "../utils/sessionManager";
 import "./Auth.css";
 
@@ -18,7 +18,6 @@ export default function Signup({ onSwitchToLogin }) {
     document.documentElement.className = theme;
 
     const cleanup = sessionManager.listenToSystemThemeChange((systemTheme) => {
-      const currentTheme = sessionManager.getSetting('theme');
       if (!localStorage.getItem('careerbot_settings')) {
         document.documentElement.className = systemTheme;
       }

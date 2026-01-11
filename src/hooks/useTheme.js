@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 
 export function useTheme() {
-  const [theme, setTheme] = useState("dark");
-
-  // Load theme from localStorage on client-side mount
-  useEffect(() => {
+  const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem("theme");
       if (savedTheme) {
-        setTheme(savedTheme);
+        return savedTheme;
       }
     }
-  }, []);
+    return "dark";
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

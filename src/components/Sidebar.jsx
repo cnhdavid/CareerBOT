@@ -12,7 +12,7 @@ import {
   History
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onNewChat, onProfile, onLogin, onSignup }) {
   const { t } = useTranslation();
