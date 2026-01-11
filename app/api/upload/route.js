@@ -96,21 +96,51 @@ ${text.slice(0, 12000)}
 
 export async function POST(request) {
   try {
+    console.log('[Upload API] Request received');
+    
     const userId = await getCurrentUser();
     
     if (!userId) {
+      console.log('[Upload API] Unauthorized - no user ID');
       return NextResponse.json(
         { error: "Access token required" },
         { status: 401 }
       );
     }
 
+    console.log('[Upload API] User authenticated:', userId);
+
+    // Check content-type header
+    const contentType = request.headers.get('content-type') || '';
+    console.log('[Upload API] Content-Type:', contentType);
+
+    if (!contentType.includes('multipart/form-data')) {
+      console.error('[Upload API] Invalid Content-Type:', contentType);
+      return NextResponse.json(
+        { 
+          error: "Invalid request format",
+          message: "Request must be multipart/form-data. Ensure you're sending a FormData object without manually setting Content-Type header."
+        },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
+    console.log('[Upload API] FormData parsed successfully');
     const conversationId = formData.get('conversationId');
     const kind = formData.get('kind');
     const file = formData.get('file');
 
+    console.log('[Upload API] FormData fields:', {
+      hasConversationId: !!conversationId,
+      hasKind: !!kind,
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size
+    });
+
     if (!conversationId) {
+      console.log('[Upload API] Missing conversationId');
       return NextResponse.json(
         { error: "conversationId required" },
         { status: 400 }
@@ -118,6 +148,7 @@ export async function POST(request) {
     }
 
     if (!file) {
+      console.log('[Upload API] Missing file');
       return NextResponse.json(
         { error: "file required" },
         { status: 400 }
@@ -135,17 +166,24 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
+    console.log('[Upload API] Converting file to buffer...');
     const fileBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(fileBuffer);
+    console.log('[Upload API] Buffer created, size:', buffer.length);
 
+    console.log('[Upload API] Extracting text from file...');
     const extracted = (await extractText(file, buffer)).trim();
+    console.log('[Upload API] Text extracted, length:', extracted.length);
+    
     if (!extracted) {
+      console.log('[Upload API] No text extracted from file');
       return NextResponse.json({
         error: "empty_text",
         message: "Konnte keinen Text aus der Datei extrahieren.",
       }, { status: 400 });
     }
 
+    console.log('[Upload API] Sending to OpenAI for analysis...');
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const prompt = buildAnalysisPrompt(kind, extracted);
@@ -163,6 +201,7 @@ export async function POST(request) {
     });
 
     const analysisText = completion.choices[0]?.message?.content ?? "";
+    console.log('[Upload API] Analysis complete, length:', analysisText.length);
 
     return NextResponse.json({
       ok: true,
@@ -175,9 +214,25 @@ export async function POST(request) {
       },
     });
   } catch (err) {
-    console.error("Upload/analyze error:", err);
+    console.error('[Upload API] Error:', err);
+    console.error('[Upload API] Error stack:', err.stack);
+    
+    // Check if it's a FormData parsing error
+    if (err.message && err.message.includes('Content-Type')) {
+      return NextResponse.json(
+        { 
+          error: "Invalid request format",
+          message: "Request must be multipart/form-data. Do not manually set Content-Type header when sending FormData."
+        },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "upload_failed" },
+      { 
+        error: "upload_failed",
+        message: err.message || "File upload and analysis failed"
+      },
       { status: 500 }
     );
   }

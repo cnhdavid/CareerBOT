@@ -206,14 +206,16 @@ useEffect(() => {
       form.append("conversationId", convId);
       form.append("kind", "cv"); // MVP default
 
+      console.log('[Upload] Sending file:', file.name, 'size:', file.size);
+
       const res = await fetch("/api/upload", {
         method: "POST",
         credentials: 'include',
-        headers: {
-          "Content-Type": "application/json",
-        },
+        // DO NOT set Content-Type header - browser will set it automatically with boundary
         body: form,
       });
+
+      console.log('[Upload] Response status:', res.status);
 
       const data = await res.json();
 
