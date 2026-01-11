@@ -119,12 +119,20 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
       if (response.ok) {
         setRooms(rooms.filter(room => room._id !== roomId));
       } else {
-        const error = await response.json();
-        alert(error.error || "Failed to delete room");
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const error = await response.json();
+          alert(error.error || "Failed to delete room");
+        } else {
+          const text = await response.text();
+          console.error("Server returned non-JSON response:", text);
+          alert("Failed to delete room. Check console for details.");
+        }
       }
     } catch (error) {
       console.error("Error deleting room:", error);
-      alert("Error deleting room");
+      alert("Error deleting room: " + error.message);
     }
   };
 

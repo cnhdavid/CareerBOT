@@ -39,16 +39,19 @@ export async function POST(request) {
     const userId = await getCurrentUser();
     
     if (!userId) {
+      console.error("Room creation failed: No userId found");
       return NextResponse.json(
         { error: "Access token required" },
         { status: 401 }
       );
     }
 
+    console.log("Creating room for userId:", userId);
     await connectDB();
     
     const { name } = await request.json();
     if (!name || name.trim() === '') {
+      console.error("Room creation failed: Empty name");
       return NextResponse.json(
         { error: "Room name is required" },
         { status: 400 }
@@ -60,7 +63,10 @@ export async function POST(request) {
       name: name.trim(),
       conversationIds: [],
     });
+    
+    console.log("Saving room:", room);
     await room.save();
+    console.log("Room saved successfully:", room._id);
     
     const savedRoom = await Room.findById(room._id).populate({
       path: 'conversationIds',
@@ -68,17 +74,22 @@ export async function POST(request) {
       options: { sort: { updatedAt: -1 } }
     });
     
+    console.log("Room populated successfully");
     return NextResponse.json(savedRoom, { status: 201 });
   } catch (error) {
     console.error("Create room error:", error);
+    console.error("Error stack:", error.stack);
+    console.error("Error name:", error.name);
+    
     if (error.message.includes("Maximum 5 conversations")) {
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
       );
     }
+    
     return NextResponse.json(
-      { error: "Error creating room" },
+      { error: "Error creating room", details: error.message },
       { status: 500 }
     );
   }
