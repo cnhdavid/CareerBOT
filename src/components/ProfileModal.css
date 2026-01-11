@@ -3,54 +3,55 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 1400px;
+  width: min(87.5rem, 95vw);
   max-width: 95vw;
   max-height: 90vh;
   background: var(--panel);
-  border-radius: 12px;
+  border-radius: 0.75rem;
   border: 1px solid var(--border);
-  padding: 24px 32px;
+  padding: 1.5rem 2rem;
   z-index: 60;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1.25rem 3.125rem rgba(0, 0, 0, 0.6);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .profile-modal h2 {
-  margin: 0 0 20px 0;
+  margin: 0 0 1.25rem 0;
   text-align: center;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
 .profile-modal h3 {
-  margin: 20px 0 12px 0;
-  font-size: 16px;
+  margin: 1.25rem 0 0.75rem 0;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text);
   border-bottom: 1px solid var(--border);
-  padding-bottom: 8px;
+  padding-bottom: 0.5rem;
 }
 
 .form-group {
   display: grid;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
-  font-size: 13px;
+  font-size: 0.8125rem;
   opacity: 0.8;
   font-weight: 500;
 }
 
 .form-group input,
 .form-group textarea {
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--border);
   background: var(--input);
   color: var(--text);
-  font-size: 14px;
+  font-size: 0.875rem;
   outline: none;
   transition: border-color 0.2s ease;
   width: 100%;
@@ -63,34 +64,34 @@
 }
 
 .form-group input[type="month"] {
-  min-width: 150px;
+  min-width: 9.375rem;
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 5rem;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .cv-form-section {
-  margin-bottom: 24px;
-  padding: 16px;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
   background: rgba(255, 255, 255, 0.02);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .experience-item,
 .education-item {
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -101,16 +102,17 @@
 
 .add-btn,
 .remove-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
   border: 1px solid var(--border);
   background: var(--input);
   color: var(--text);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 8px;
+  margin-top: 0.5rem;
+  touch-action: manipulation;
 }
 
 .add-btn:hover {
@@ -126,16 +128,17 @@
 }
 
 .advanced-toggle {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
   border: 1px solid var(--border);
   background: var(--input);
   color: var(--text);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
+  touch-action: manipulation;
 }
 
 .advanced-toggle:hover {
@@ -144,40 +147,43 @@
 }
 
 .error-message {
-  padding: 10px 12px;
+  padding: 0.625rem 0.75rem;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   color: #ef4444;
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .file-info {
-  font-size: 12px;
+  font-size: 0.75rem;
   opacity: 0.7;
-  margin-top: 4px;
+  margin-top: 0.25rem;
 }
 
 .modal-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 
 .cancel-btn,
 .save-btn {
   flex: 1;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--border);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  touch-action: manipulation;
+  min-width: 7.5rem;
 }
 
 .cancel-btn {
@@ -207,29 +213,30 @@
 }
 
 .cv-upload-section {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border);
   text-align: center;
 }
 
 .upload-cv-btn {
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
   border: 2px solid #3b82f6;
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(59, 130, 246, 0.3);
+  touch-action: manipulation;
 }
 
 .upload-cv-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-0.0625rem);
+  box-shadow: 0 0.375rem 1rem rgba(59, 130, 246, 0.4);
 }
 
 .upload-cv-btn:disabled {
@@ -240,53 +247,81 @@
 }
 
 .upload-status {
-  margin-top: 12px;
-  font-size: 13px;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
   color: #3b82f6;
   font-style: italic;
   opacity: 0.8;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 68.75rem) {
   .profile-modal {
     width: 95vw;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 56.25rem) {
   .profile-modal {
     width: 95vw;
-    padding: 20px 24px;
+  }
+}
+
+@media (max-width: 48rem) {
+  .profile-modal {
+    width: 95vw;
+    padding: 1.25rem 1.5rem;
   }
   
   .form-row {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 0.75rem;
   }
   
   .cv-form-section {
-    padding: 12px;
+    padding: 0.75rem;
   }
   
   .experience-item,
   .education-item {
-    padding: 12px;
+    padding: 0.75rem;
+  }
+
+  .profile-modal h2 {
+    font-size: 1.125rem;
+  }
+
+  .profile-modal h3 {
+    font-size: 0.9375rem;
   }
 }
 
-@media (max-width: 900px) {
-  .profile-modal {
-    width: 95vw;
-  }
-}
-
-@media (max-width: 480px) {
+@media (max-width: 30rem) {
   .profile-modal {
     width: 98vw;
-    padding: 16px 20px;
+    padding: 1rem 1.25rem;
+    max-height: 95vh;
   }
   
   .modal-actions {
     flex-direction: column;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .add-btn,
+  .remove-btn,
+  .advanced-toggle {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.875rem;
   }
 }
