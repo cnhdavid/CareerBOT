@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import mammoth from "mammoth";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import PDFParser from "pdf2json";
 import { getCurrentUser } from "@/lib/auth";
 
 const ALLOWED_EXT = new Set([".pdf", ".docx", ".txt"]);
@@ -17,23 +17,43 @@ function getExt(filename = "") {
 }
 
 async function extractPdfText(buffer) {
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
-  const pdf = await loadingTask.promise;
-
-  let fullText = "";
-
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const content = await page.getTextContent();
-
-    const strings = content.items
-      .map((item) => ("str" in item ? item.str : ""))
-      .filter(Boolean);
-
-    fullText += strings.join(" ") + "\n";
-  }
-
-  return fullText;
+  const pdfParser = new PDFParser();
+  
+  return new Promise((resolve, reject) => {
+    pdfParser.on('pdfParser_dataError', (errData) => {
+      reject(new Error(errData.parserError));
+    });
+    
+    pdfParser.on('pdfParser_dataReady', (pdfData) => {
+      try {
+        let extractedText = '';
+        
+        if (pdfData.Pages && Array.isArray(pdfData.Pages)) {
+          pdfData.Pages.forEach((page) => {
+            if (page.Texts && Array.isArray(page.Texts)) {
+              const pageText = page.Texts
+                .map(text => {
+                  if (text.R && Array.isArray(text.R)) {
+                    return text.R.map(r => decodeURIComponent(r.T || '')).join(' ');
+                  }
+                  return '';
+                })
+                .filter(Boolean)
+                .join(' ');
+              
+              extractedText += pageText + '\n';
+            }
+          });
+        }
+        
+        resolve(extractedText.trim());
+      } catch (extractError) {
+        reject(extractError);
+      }
+    });
+    
+    pdfParser.parseBuffer(buffer);
+  });
 }
 
 async function extractText(file, buffer) {
