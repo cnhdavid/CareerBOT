@@ -5,6 +5,7 @@ import User from "@/lib/models/User";
 import File from "@/lib/models/File";
 import { getCurrentUser } from "@/lib/auth";
 import { SYSTEM_PROMPT } from "@/lib/constants";
+import { validateInput } from "@/lib/inputValidation";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -95,6 +96,28 @@ export async function POST(request) {
       );
     }
 
+    // Validate the last user message for harmful content and profanity
+    const lastUserMessage = [...messages].reverse().find(m => m.role === "user");
+    if (lastUserMessage) {
+      const validation = validateInput(lastUserMessage.content);
+      
+      if (!validation.isValid) {
+        // Return harmful content response
+        return NextResponse.json({ 
+          text: validation.response,
+          topic: "blocked"
+        });
+      }
+      
+      if (validation.type === 'profanity') {
+        // Return profanity warning immediately - don't call OpenAI
+        return NextResponse.json({ 
+          text: validation.response,
+          topic: "profanity_warning"
+        });
+      }
+    }
+
     let userContext = "";
     if (!isGuest && userId) {
       await connectDB();
@@ -180,8 +203,8 @@ export async function POST(request) {
     });
 
     return NextResponse.json({ 
-      text: response.choices[0]?.message?.content ?? "", 
-      topic 
+      text: response.choices[0]?.message?.content ?? "",
+      topic: topic 
     });
   } catch (err) {
     console.error(err);
