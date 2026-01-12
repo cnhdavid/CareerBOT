@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Paperclip, Send, Loader2 } from "lucide-react";
+import { Paperclip, Send, Loader2, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ResourcesPanel from "./ResourcesPanel";
 import "./Chat.css";
 
-export default function Chat({ messages, input, setInput, loading, onSend, topic, onUpload }) {
+export default function Chat({ messages, input, setInput, loading, onSend, topic, onUpload, selectedFile, onClearFile }) {
   const { t } = useTranslation();
   const endRef = useRef(null);
   const scrollRef = useRef(null);
@@ -33,7 +33,7 @@ export default function Chat({ messages, input, setInput, loading, onSend, topic
     setIsAtBottom(atBottom);
   }
 
-  const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
+  const canSend = useMemo(() => (input.trim().length > 0 || selectedFile) && !loading, [input, selectedFile, loading]);
 
   return (
     <div className="chatShell">
@@ -60,6 +60,34 @@ export default function Chat({ messages, input, setInput, loading, onSend, topic
           <div ref={endRef} />
         </div>
       </div>
+
+      {/* Selected File Display */}
+      {selectedFile && (
+        <div className="selected-file-display" style={{
+          padding: '8px 16px',
+          backgroundColor: 'var(--bg-secondary)',
+          borderTop: '1px solid var(--border-color)',
+          borderBottom: '1px solid var(--border-color)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '14px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Paperclip size={16} />
+            <span>{selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+          </div>
+          <button
+            className="iconBtn"
+            type="button"
+            onClick={onClearFile}
+            aria-label="Clear file"
+            style={{ padding: '4px' }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       <ResourcesPanel topic={topic} />
 

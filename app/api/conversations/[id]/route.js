@@ -53,7 +53,7 @@ export async function PUT(request, { params }) {
     await connectDB();
     
     const { id } = await params;
-    const { role, content } = await request.json();
+    const { role, content, documentId, filename } = await request.json();
     
     if (!role || !content) {
       return NextResponse.json(
@@ -62,10 +62,14 @@ export async function PUT(request, { params }) {
       );
     }
 
+    const messageData = { role, content };
+    if (documentId) messageData.documentId = documentId;
+    if (filename) messageData.filename = filename;
+
     const conversation = await Conversation.findOneAndUpdate(
       { _id: id, userId },
       {
-        $push: { messages: { role, content } },
+        $push: { messages: messageData },
         updatedAt: Date.now(),
       },
       { new: true }

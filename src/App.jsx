@@ -30,6 +30,7 @@ export default function App() {
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // Chatverlauf
   const [messages, setMessages] = useState([]);
@@ -85,6 +86,7 @@ export default function App() {
     setCurrentRoomId(null);
     setMessages([]);
     setTopic("Other");
+    setSelectedFile(null);
     
     // Clear localStorage
     localStorage.removeItem("currentConversationId");
@@ -97,18 +99,22 @@ export default function App() {
     setShowProfile(false);
   };
 
-  const saveMessageWithId = async (convId, role, content) => {
+  const saveMessageWithId = async (convId, role, content, documentId = null, filename = null) => {
     if (!convId) {
       console.log("❌ Cannot save message - no convId:", { role, content, convId });
       return;
     }
-    console.log("💾 Saving message with ID:", { role, content, convId });
+    console.log("💾 Saving message with ID:", { role, content, convId, documentId, filename });
     try {
+      const messageData = { role, content };
+      if (documentId) messageData.documentId = documentId;
+      if (filename) messageData.filename = filename;
+      
       const response = await fetch(`/api/conversations/${convId}`, {
         method: "PUT",
         credentials: 'include',
         headers: getHeaders(),
-        body: JSON.stringify({ role, content }),
+        body: JSON.stringify(messageData),
       });
       
       if (!response.ok) {
@@ -176,88 +182,16 @@ useEffect(() => {
 
 }, [user]);
 
-  async function handleUpload(file) {
+  function handleUpload(file) {
     if (loading) return;
-
-    // Ensure we have a conversationId (upload should be linked)
-    let convId = conversationId;
-    if (!convId) {
-      const res = await fetch("/api/conversations", { method: "POST", credentials: 'include' });
-      const conv = await res.json();
-      convId = conv._id;
-      setConversationId(convId);
-      // Save new conversation ID to localStorage
-      localStorage.setItem("currentConversationId", convId);
-      localStorage.removeItem("currentRoomId"); // New conversation has no room
-    }
-
-    // Show info message in chat
-    const userMsg = { id: uid(), role: "user", content: `📎 Datei hochgeladen: ${file.name}` };
-    setMessages((prev) => [...prev, userMsg]);
-
-    // NOTE: saveMessage uses conversationId state; ensure it is set
-    await saveMessageWithId(convId, "user", userMsg.content);
-
-    setLoading(true);
-
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("conversationId", convId);
-      form.append("kind", "cv"); // MVP default
-
-      console.log('[Upload] Sending file:', file.name, 'size:', file.size);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        credentials: 'include',
-        // DO NOT set Content-Type header - browser will set it automatically with boundary
-        body: form,
-      });
-
-      console.log('[Upload] Response status:', res.status);
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const msg =
-          data?.message ||
-          data?.error ||
-          "Upload fehlgeschlagen (ungültiges Format oder Serverfehler).";
-        const botMsg = { id: uid(), role: "assistant", content: `⚠️ ${msg}` };
-        setMessages((prev) => [...prev, botMsg]);
-
-        await saveMessageWithId(convId, "assistant", botMsg.content);
-        return;
-      }
-
-      const analysis = data?.analysisText || "Keine Analyse erhalten.";
-      const botMsg = {
-        id: uid(),
-        role: "assistant",
-        content: `✅ **Analyse (CV/Anschreiben)**\n\n${analysis}`,
-      };
-
-      setMessages((prev) => [...prev, botMsg]);
-
-      await saveMessageWithId(convId, "assistant", botMsg.content);
-    } catch (_e) {
-      const botMsg = {
-        id: uid(),
-        role: "assistant",
-        content: "⚠️ Upload/Analyse fehlgeschlagen (Network Error).",
-      };
-      setMessages((prev) => [...prev, botMsg]);
-
-      await saveMessageWithId(convId, "assistant", botMsg.content);
-    } finally {
-      setLoading(false);
-    }
+    setSelectedFile(file);
+    console.log('[File Selection] File selected:', file.name, 'size:', file.size);
   }
 
   async function handleSend() {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text && !selectedFile) return;
+    if (loading) return;
 
     setLoading(true);
     setInput("");
@@ -273,31 +207,103 @@ useEffect(() => {
       localStorage.setItem("currentConversationId", convId);
       localStorage.removeItem("currentRoomId"); // New conversation has no room
     }
-  
-    const userMsg = { id: uid(), role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
-    
-    // Track guest messages
-    if (isGuestMode) {
-      const newCount = guestMessageCount + 1;
-      setGuestMessageCount(newCount);
+
+    let uploadedFileData = null;
+
+    // Handle file upload if file is selected (do this first)
+    if (selectedFile && !isGuestMode && convId) {
+      try {
+        const form = new FormData();
+        form.append("file", selectedFile);
+        form.append("conversationId", convId);
+        form.append("messageText", text || "");
+
+        const res = await fetch("/api/upload-file", {
+          method: "POST",
+          credentials: 'include',
+          body: form,
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          uploadedFileData = data.file;
+        } else {
+          const errorMsg = data?.message || data?.error || "Upload failed";
+          const botMsg = { 
+            id: uid(), 
+            role: "assistant", 
+            content: `⚠️ ${errorMsg}` 
+          };
+          setMessages((prev) => [...prev, botMsg]);
+          await saveMessageWithId(convId, "assistant", botMsg.content);
+          setLoading(false);
+          setSelectedFile(null);
+          return;
+        }
+      } catch (error) {
+        console.error('[File Upload] Error:', error);
+        const botMsg = {
+          id: uid(),
+          role: "assistant",
+          content: "⚠️ File upload failed (Network Error).",
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        await saveMessageWithId(convId, "assistant", botMsg.content);
+        setLoading(false);
+        setSelectedFile(null);
+        return;
+      }
+    }
+
+    // Add user message to chat if there's text
+    if (text) {
+      const userMsg = { id: uid(), role: "user", content: text };
+      setMessages((prev) => [...prev, userMsg]);
       
-      // Show signup CTA after 3-5 messages (randomly between 3-5)
-      if (newCount >= 3 && newCount <= 5 && !showSignupCTA) {
-        const showAt = 3 + Math.floor(Math.random() * 3); // Random between 3-5
-        if (newCount === showAt) {
-          setShowSignupCTA(true);
+      // Track guest messages
+      if (isGuestMode) {
+        const newCount = guestMessageCount + 1;
+        setGuestMessageCount(newCount);
+        
+        // Show signup CTA after 3-5 messages (randomly between 3-5)
+        if (newCount >= 3 && newCount <= 5 && !showSignupCTA) {
+          const showAt = 3 + Math.floor(Math.random() * 3); // Random between 3-5
+          if (newCount === showAt) {
+            setShowSignupCTA(true);
+          }
         }
       }
     }
+
+    // Add upload message to chat if file was uploaded
+    if (uploadedFileData) {
+      const uploadMsg = { 
+        id: uid(), 
+        role: "user", 
+        content: `📎 Document uploaded: ${selectedFile.name}`,
+        documentId: uploadedFileData.id,
+        filename: selectedFile.name
+      };
+      setMessages((prev) => [...prev, uploadMsg]);
+      await saveMessageWithId(convId, "user", uploadMsg.content, uploadedFileData.id, selectedFile.name);
+    }
   
     try {
-      console.log("📤 Sending chat request:", {
-        messageCount: messages.length,
-        currentRoomId: currentRoomId,
-        conversationId: conversationId,
-        isGuestMode: isGuestMode
-      });
+      // Build messages array including the upload message if file was uploaded
+      const messagesForLLM = [...messages];
+      if (text) {
+        messagesForLLM.push({ id: uid(), role: "user", content: text });
+      }
+      if (uploadedFileData) {
+        messagesForLLM.push({
+          id: uid(),
+          role: "user", 
+          content: `📎 Document uploaded: ${selectedFile.name}`,
+          documentId: uploadedFileData.id,
+          filename: selectedFile.name
+        });
+      }
       
       const res = await fetch("/api/answer", {
         method: "POST",
@@ -306,7 +312,7 @@ useEffect(() => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...messages, userMsg],
+          messages: messagesForLLM,
           roomId: currentRoomId,
         }),
       });
@@ -335,7 +341,9 @@ useEffect(() => {
       
       // Save both messages to the database (only for authenticated users)
       if (!isGuestMode && convId) {
-        await saveMessageWithId(convId, "user", text);
+        if (text) {
+          await saveMessageWithId(convId, "user", text);
+        }
         await saveMessageWithId(convId, "assistant", botText);
       }
     } catch (_e) {
@@ -352,6 +360,7 @@ useEffect(() => {
       }
     } finally {
       setLoading(false);
+      setSelectedFile(null); // Clear selected file after sending
     }
   }
 
@@ -456,6 +465,8 @@ useEffect(() => {
             onSend={handleSend}
             topic={topic}
             onUpload={handleUpload}
+            selectedFile={selectedFile}
+            onClearFile={() => setSelectedFile(null)}
           />
         </div>
       </main>
