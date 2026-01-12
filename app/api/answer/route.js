@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
+import File from "@/lib/models/File";
 import { getCurrentUser } from "@/lib/auth";
 import { SYSTEM_PROMPT } from "@/lib/constants";
 
@@ -30,6 +31,48 @@ function detectTopic(messages) {
   }
 
   return "Other";
+}
+
+async function getDocumentContext(messages) {
+  const documentIds = new Set();
+  const documentContexts = [];
+
+  // Extract document IDs from messages
+  messages.forEach(msg => {
+    if (msg.documentId) {
+      documentIds.add(msg.documentId.toString());
+    }
+  });
+
+  if (documentIds.size === 0) {
+    return "";
+  }
+
+  try {
+    await connectDB();
+    
+    // Fetch all documents
+    const documents = await File.find({
+      _id: { $in: Array.from(documentIds) }
+    }).select('filename extractedText');
+
+    // Build context for each document
+    documents.forEach(doc => {
+      if (doc.extractedText && doc.extractedText.trim()) {
+        documentContexts.push(
+          `Document: ${doc.filename}\nContent: ${doc.extractedText.trim()}`
+        );
+      }
+    });
+
+    if (documentContexts.length > 0) {
+      return "\n\n--- DOCUMENT CONTEXT ---\n" + documentContexts.join("\n\n---\n\n") + "\n--- END DOCUMENT CONTEXT ---";
+    }
+  } catch (error) {
+    console.error("Error fetching document context:", error);
+  }
+
+  return "";
 }
 
 export async function POST(request) {
@@ -112,11 +155,19 @@ export async function POST(request) {
       }
     }
 
-    const conversationMessages = messages.map(m => ({ role: m.role, content: m.content }));
+    const conversationMessages = messages.map(m => ({ 
+      role: m.role, 
+      content: m.content,
+      documentId: m.documentId,
+      filename: m.filename
+    }));
+
+    // Get document context for messages that have document references
+    const documentContext = await getDocumentContext(conversationMessages);
 
     const enhancedSystemPrompt = userContext
-      ? `${SYSTEM_PROMPT}\n\nNUTZER-KONTEXT: ${userContext}`
-      : SYSTEM_PROMPT;
+      ? `${SYSTEM_PROMPT}\n\nNUTZER-KONTEXT: ${userContext}${documentContext}`
+      : `${SYSTEM_PROMPT}${documentContext}`;
     
     const topic = detectTopic(conversationMessages);
 
