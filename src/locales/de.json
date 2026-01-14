@@ -56,5 +56,12 @@
     "title": "Konversationen",
     "noConversations": "Keine Konversationen gefunden.",
     "confirmDelete": "Sind Sie sicher, dass Sie diese Konversation löschen möchten?"
+  },
+  "rooms": {
+    "title": "Räume",
+    "noRooms": "Keine Räume verfügbar.",
+    "joinRoom": "Raum beitreten",
+    "leaveRoom": "Raum verlassen",
+    "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?"
   }
 }
