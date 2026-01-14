@@ -13,6 +13,7 @@ import GuestModeIndicator from "./components/GuestModeIndicator";
 import SignupCTA from "./components/SignupCTA";
 import { useAuth } from "./hooks/useAuth";
 import { sessionManager } from "./utils/sessionManager";
+import { generateConversationTitle } from "@/lib/generateConversationTitle";
 import "./App.css";
 
 const uid = () => crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
@@ -199,7 +200,13 @@ useEffect(() => {
     let convId = conversationId;
     // Only create conversation for authenticated users
     if (!convId && !isGuestMode) {
-      const res = await fetch("/api/conversations", { method: "POST", credentials: 'include', headers: getHeaders() });
+      const title = generateConversationTitle(text);
+      const res = await fetch("/api/conversations", { 
+        method: "POST", 
+        credentials: 'include', 
+        headers: getHeaders(),
+        body: JSON.stringify({ title })
+      });
       const conv = await res.json();
       convId = conv._id;
       setConversationId(convId);
