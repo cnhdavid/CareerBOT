@@ -10,7 +10,11 @@
     "title": "Settings",
     "theme": "Theme",
     "language": "Language",
-    "close": "Close"
+    "close": "Close",
+    "light": "Light",
+    "dark": "Dark",
+    "de": "German",
+    "en": "English"
   },
   "login": {
     "title": "Login",
@@ -56,5 +60,35 @@
     "title": "Conversations",
     "noConversations": "No conversations found.",
     "confirmDelete": "Are you sure you want to delete this conversation?"
+  },
+  "rooms": {
+    "title": "Rooms",
+    "noRooms": "No rooms found. Create your first room!",
+    "joinRoom": "Join Room",
+    "leaveRoom": "Leave Room",
+    "confirmLeave": "Are you sure you want to leave this room?",
+    "createRoom": "Create Room",
+    "roomNamePlaceholder": "Enter room name...",
+    "conversations": "conversations",
+    "addCurrentConversation": "Add current conversation",
+    "emptyRoom": "No conversations in this room yet.",
+    "addExistingConversations": "Add existing conversations",
+    "noAvailableConversations": "All conversations are already in this room",
+    "add": "Add",
+    "failedToCreateRoom": "Failed to create room",
+    "errorCreatingRoom": "Error creating room",
+    "failedToUpdateRoom": "Failed to update room",
+    "errorUpdatingRoom": "Error updating room",
+    "deleteRoomConfirm": "Are you sure you want to delete this room? Conversations will not be deleted.",
+    "failedToDeleteRoom": "Failed to delete room",
+    "errorDeletingRoom": "Error deleting room",
+    "failedToAddConversation": "Failed to add conversation to room",
+    "errorAddingConversation": "Error adding conversation to room",
+    "failedToRemoveConversation": "Failed to remove conversation from room",
+    "errorRemovingConversation": "Error removing conversation from room"
+  },
+  "common": {
+    "create": "Create",
+    "cancel": "Cancel"
   }
 }

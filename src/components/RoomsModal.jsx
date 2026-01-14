@@ -70,11 +70,11 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
         setShowCreateForm(false);
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to create room");
+        alert(error.error || t('rooms.failedToCreateRoom', { defaultValue: 'Failed to create room' }));
       }
     } catch (error) {
       console.error("Error creating room:", error);
-      alert("Error creating room");
+      alert(t('rooms.errorCreatingRoom', { defaultValue: 'Error creating room' }));
     }
   };
 
@@ -97,16 +97,16 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
         setEditRoomName("");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to update room");
+        alert(error.error || t('rooms.failedToUpdateRoom', { defaultValue: 'Failed to update room' }));
       }
     } catch (error) {
       console.error("Error updating room:", error);
-      alert("Error updating room");
+      alert(t('rooms.errorUpdatingRoom', { defaultValue: 'Error updating room' }));
     }
   };
 
   const deleteRoom = async (roomId) => {
-    if (!confirm("Are you sure you want to delete this room? Conversations will not be deleted.")) {
+    if (!confirm(t('rooms.deleteRoomConfirm', { defaultValue: 'Are you sure you want to delete this room? Conversations will not be deleted.' }))) {
       return;
     }
 
@@ -123,16 +123,16 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const error = await response.json();
-          alert(error.error || "Failed to delete room");
+          alert(error.error || t('rooms.failedToDeleteRoom', { defaultValue: 'Failed to delete room' }));
         } else {
           const text = await response.text();
           console.error("Server returned non-JSON response:", text);
-          alert("Failed to delete room. Check console for details.");
+          alert(t('rooms.failedToDeleteRoom', { defaultValue: 'Failed to delete room' }));
         }
       }
     } catch (error) {
       console.error("Error deleting room:", error);
-      alert("Error deleting room: " + error.message);
+      alert(t('rooms.errorDeletingRoom', { defaultValue: 'Error deleting room' }) + ": " + error.message);
     }
   };
 
@@ -152,11 +152,11 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
         ));
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to add conversation to room");
+        alert(error.error || t('rooms.failedToAddConversation', { defaultValue: 'Failed to add conversation to room' }));
       }
     } catch (error) {
       console.error("Error adding conversation to room:", error);
-      alert("Error adding conversation to room");
+      alert(t('rooms.errorAddingConversation', { defaultValue: 'Error adding conversation to room' }));
     }
   };
 
@@ -174,11 +174,11 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
         ));
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to remove conversation from room");
+        alert(error.error || t('rooms.failedToRemoveConversation', { defaultValue: 'Failed to remove conversation from room' }));
       }
     } catch (error) {
       console.error("Error removing conversation from room:", error);
-      alert("Error removing conversation from room");
+      alert(t('rooms.errorRemovingConversation', { defaultValue: 'Error removing conversation from room' }));
     }
   };
 
