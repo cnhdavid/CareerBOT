@@ -9,10 +9,9 @@ export default function SettingsModal({ theme, setTheme, onLanguageChange, onClo
 
       <div className="setting-row">
         <label>{t('settings.theme')}</label>
-
         <select value={theme} onChange={e => setTheme(e.target.value)}>
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
+          <option value="dark">{t('settings.dark')}</option>
+          <option value="light">{t('settings.light')}</option>
         </select>
       </div>
 
@@ -20,8 +19,8 @@ export default function SettingsModal({ theme, setTheme, onLanguageChange, onClo
         <label>{t('settings.language')}</label>
 
         <select value={i18n.language} onChange={e => onLanguageChange(e.target.value)}>
-          <option value="de">Deutsch</option>
-          <option value="en">English</option>
+          <option value="de">{t('settings.de')}</option>
+          <option value="en">{t('settings.en')}</option>
         </select>
       </div>
 

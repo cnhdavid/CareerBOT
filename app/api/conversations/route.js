@@ -30,7 +30,7 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request) {
   try {
     const userId = await getCurrentUser();
     
@@ -43,8 +43,11 @@ export async function POST() {
 
     await connectDB();
     
+    let { title } = await request.json().catch(() => ({}));
+    
     const conversation = new Conversation({
       userId,
+      name: title || "New Conversation",
       messages: [],
     });
     await conversation.save();
