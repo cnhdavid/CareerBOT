@@ -10,7 +10,9 @@
     "title": "Einstellungen",
     "theme": "Theme",
     "language": "Sprache",
-    "close": "Schließen"
+    "close": "Schließen",
+    "de": "Deutsch",
+    "en": "Englisch"
   },
   "login": {
     "title": "Anmelden",
@@ -62,6 +64,7 @@
     "noRooms": "Keine Räume verfügbar.",
     "joinRoom": "Raum beitreten",
     "leaveRoom": "Raum verlassen",
-    "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?"
+    "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?",
+    "create": "Erstellen"
   }
 }
