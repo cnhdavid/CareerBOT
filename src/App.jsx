@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
 import ConversationsModal from "./components/ConversationsModal";
 import RoomsModal from "./components/RoomsModal";
+import DiscoverModal from "./components/DiscoverModal";
 import ProfileModal from "./components/ProfileModal";
 import Chat from "./components/Chat";
 import Login from "./components/Login";
@@ -26,6 +27,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showConversations, setShowConversations] = useState(false);
   const [showRooms, setShowRooms] = useState(false);
+  const [showDiscover, setShowDiscover] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [theme, setTheme] = useState('dark');
 
@@ -423,26 +425,37 @@ useEffect(() => {
         onSettings={() => {
           setShowConversations(false);
           setShowRooms(false);
+          setShowDiscover(false);
           setShowProfile(false);
           setShowSettings(true);
         }}
         onConversations={() => {
           setShowSettings(false);
           setShowRooms(false);
+          setShowDiscover(false);
           setShowProfile(false);
           setShowConversations(true);
         }}
         onRooms={() => {
           setShowSettings(false);
           setShowConversations(false);
+          setShowDiscover(false);
           setShowProfile(false);
           setShowRooms(true);
+        }}
+        onDiscover={() => {
+          setShowSettings(false);
+          setShowConversations(false);
+          setShowRooms(false);
+          setShowProfile(false);
+          setShowDiscover(true);
         }}
         onNewChat={newChat}
         onProfile={() => {
           setShowSettings(false);
           setShowConversations(false);
           setShowRooms(false);
+          setShowDiscover(false);
           setShowProfile(true);
         }}
         onLogin={handleLoginFromSidebar}
@@ -507,6 +520,15 @@ useEffect(() => {
             onClose={() => setShowRooms(false)}
             onLoadConversation={loadConversation}
             currentConversationId={conversationId}
+          />
+        </>
+      )}
+
+      {showDiscover && (
+        <>
+          <div className="overlay" onClick={() => setShowDiscover(false)} />
+          <DiscoverModal
+            onClose={() => setShowDiscover(false)}
           />
         </>
       )}

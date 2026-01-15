@@ -14,7 +14,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 
-export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onNewChat, onProfile, onLogin, onSignup }) {
+export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onDiscover, onNewChat, onProfile, onLogin, onSignup }) {
   const { t } = useTranslation();
   const { user, logout, isGuestMode, exitGuestMode } = useAuth();
   
@@ -53,7 +53,7 @@ export default function Sidebar({ open, onClose, onSettings, onConversations, on
           <span className="label">{t('sidebar.home')}</span>
         </button>
 
-        <button className="sidebar-item" onClick={(e) => e.preventDefault()}>
+        <button className="sidebar-item" onClick={onDiscover}>
           <Compass size={18} />
           <span className="label">{t('sidebar.discover')}</span>
         </button>
