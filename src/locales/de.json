@@ -61,7 +61,7 @@
   },
   "rooms": {
     "title": "Räume",
-    "noRooms": "Keine Räume verfügbar.",
+    "noRooms": "Keine Räume gefunden. Erstellen Sie Ihren ersten Raum!",
     "joinRoom": "Raum beitreten",
     "leaveRoom": "Raum verlassen",
     "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?",
