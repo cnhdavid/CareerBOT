@@ -11,8 +11,6 @@
     "theme": "Theme",
     "language": "Sprache",
     "close": "Schließen",
-    "light": "Hell",
-    "dark": "Dunkel",
     "de": "Deutsch",
     "en": "Englisch"
   },
@@ -67,28 +65,6 @@
     "joinRoom": "Raum beitreten",
     "leaveRoom": "Raum verlassen",
     "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?",
-    "createRoom": "Raum erstellen",
-    "roomNamePlaceholder": "Raumnamen eingeben...",
-    "conversations": "Konversationen",
-    "addCurrentConversation": "Aktuelle Konversation hinzufügen",
-    "emptyRoom": "Noch keine Konversationen in diesem Raum.",
-    "addExistingConversations": "Vorhandene Konversationen hinzufügen",
-    "noAvailableConversations": "Alle Konversationen sind bereits in diesem Raum",
-    "add": "Hinzufügen",
-    "failedToCreateRoom": "Fehler beim Erstellen des Raums",
-    "errorCreatingRoom": "Fehler beim Erstellen des Raums",
-    "failedToUpdateRoom": "Fehler beim Aktualisieren des Raums",
-    "errorUpdatingRoom": "Fehler beim Aktualisieren des Raums",
-    "deleteRoomConfirm": "Sind Sie sicher, dass Sie diesen Raum löschen möchten? Konversationen werden nicht gelöscht.",
-    "failedToDeleteRoom": "Fehler beim Löschen des Raums",
-    "errorDeletingRoom": "Fehler beim Löschen des Raums",
-    "failedToAddConversation": "Fehler beim Hinzufügen der Konversation zum Raum",
-    "errorAddingConversation": "Fehler beim Hinzufügen der Konversation zum Raum",
-    "failedToRemoveConversation": "Fehler beim Entfernen der Konversation aus dem Raum",
-    "errorRemovingConversation": "Fehler beim Entfernen der Konversation aus dem Raum"
-  },
-  "common": {
-    "create": "Erstellen",
-    "cancel": "Abbrechen"
+    "create": "Erstellen"
   }
 }
