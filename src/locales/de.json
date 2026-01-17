@@ -66,5 +66,29 @@
     "leaveRoom": "Raum verlassen",
     "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?",
     "create": "Erstellen"
+  },
+  "interview": {
+    "title": "Simuliertes Vorstellungsgespräch",
+    "subtitle": "Üben Sie Ihre Vorstellungsgespräche mit KI-gestützten Fragen",
+    "noJob": "Keine Zielposition gefunden",
+    "noJobMessage": "Um ein simuliertes Vorstellungsgespräch zu starten, müssen Sie eine Zielposition in Ihrem Profil speichern.",
+    "goToProfile": "Zum Profil",
+    "interviewFor": "Vorstellungsgespräch für:",
+    "questionsInfo": "Sie werden 7 maßgeschneiderte Fragen basierend auf Ihrer Zielposition gestellt. Nehmen Sie sich Zeit für durchdachte Antworten.",
+    "start": "Vorstellungsgespräch starten",
+    "progress": "Frage {{current}} von {{total}}",
+    "answerPlaceholder": "Geben Sie Ihre Antwort hier ein...",
+    "finish": "Beenden",
+    "summary": "Vorstellungsgesprächszusammenfassung",
+    "summarySubtitle": "Hier sind Ihre Antworten",
+    "restart": "Vorstellungsgespräch neu starten",
+    "export": "Antworten exportieren"
+  },
+  "common": {
+    "create": "Erstellen",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "close": "Schließen"
   }
 }

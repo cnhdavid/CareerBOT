@@ -9,12 +9,13 @@ import {
   LogOut,
   LogIn,
   UserPlus,
-  History
+  History,
+  Briefcase
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 
-export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onDiscover, onNewChat, onProfile, onLogin, onSignup }) {
+export default function Sidebar({ open, onClose, onSettings, onConversations, onRooms, onDiscover, onNewChat, onProfile, onLogin, onSignup, onInterview }) {
   const { t } = useTranslation();
   const { user, logout, isGuestMode, exitGuestMode } = useAuth();
   
@@ -66,6 +67,11 @@ export default function Sidebar({ open, onClose, onSettings, onConversations, on
         <button className="sidebar-item" onClick={onConversations}>
           <History size={18} />
           <span className="label">{t('sidebar.conversations', { defaultValue: 'Conversations' })}</span>
+        </button>
+
+        <button className="sidebar-item" onClick={onInterview}>
+          <Briefcase size={18} />
+          <span className="label">{t('sidebar.interview', { defaultValue: 'Simulated Interview' })}</span>
         </button>
 
       </nav>

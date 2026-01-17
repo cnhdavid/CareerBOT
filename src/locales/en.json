@@ -87,8 +87,28 @@
     "failedToRemoveConversation": "Failed to remove conversation from room",
     "errorRemovingConversation": "Error removing conversation from room"
   },
+  "interview": {
+    "title": "Simulated Interview",
+    "subtitle": "Practice your interview skills with AI-guided questions",
+    "noJob": "No Target Job Found",
+    "noJobMessage": "To start a simulated interview, you need to save a target job position in your profile.",
+    "goToProfile": "Go to Profile",
+    "interviewFor": "Interview for:",
+    "questionsInfo": "You'll be asked 7 tailored questions based on your target position. Take your time to provide thoughtful answers.",
+    "start": "Start Interview",
+    "progress": "Question {{current}} of {{total}}",
+    "answerPlaceholder": "Type your answer here...",
+    "finish": "Finish",
+    "summary": "Interview Summary",
+    "summarySubtitle": "Here are your responses",
+    "restart": "Restart Interview",
+    "export": "Export Answers"
+  },
   "common": {
     "create": "Create",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
   }
 }
