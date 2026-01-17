@@ -69,7 +69,7 @@
     "create": "Erstellen"
   },
   "interview": {
-    "title": "Simuliertes Vorstellungsgespräch",
+    "title": "Simuliertes Interview",
     "subtitle": "KI-gestütztes Übungsvorstellungsgespräch für Ihre Zielposition",
     "noJob": "Keine Zielposition gefunden",
     "noJobMessage": "Um ein simuliertes Vorstellungsgespräch zu starten, müssen Sie eine Zielposition in Ihrem Profil speichern.",
