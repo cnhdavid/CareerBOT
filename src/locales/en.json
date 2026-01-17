@@ -87,6 +87,19 @@
     "failedToRemoveConversation": "Failed to remove conversation from room",
     "errorRemovingConversation": "Error removing conversation from room"
   },
+  "discover": {
+    "title": "Discover",
+    "jobTitlePlaceholder": "Job title or position...",
+    "locationPlaceholder": "Location (e.g., Berlin, Germany)",
+    "generatingSuggestions": "Generating suggestions...",
+    "basedOnProfile": "Based on your profile:",
+    "remoteOnly": "Remote only",
+    "searching": "Searching...",
+    "search": "Search",
+    "foundJobs": "Found {{count}} job{{plural}}",
+    "viewJob": "View Job →",
+    "noJobsFound": "No jobs found for \"{{query}}\""
+  },
   "common": {
     "create": "Create",
     "cancel": "Cancel"

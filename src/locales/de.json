@@ -87,6 +87,19 @@
     "failedToRemoveConversation": "Fehler beim Entfernen der Konversation aus dem Raum",
     "errorRemovingConversation": "Fehler beim Entfernen der Konversation aus dem Raum"
   },
+  "discover": {
+    "title": "Entdecken",
+    "jobTitlePlaceholder": "Jobtitel oder Position...",
+    "locationPlaceholder": "Standort (z.B. Berlin, Deutschland)",
+    "generatingSuggestions": "Generiere Vorschläge...",
+    "basedOnProfile": "Basierend auf Ihrem Profil:",
+    "remoteOnly": "Nur Remote",
+    "searching": "Suche...",
+    "search": "Suchen",
+    "foundJobs": "{{count}} Job{{plural}} gefunden",
+    "viewJob": "Job anzeigen →",
+    "noJobsFound": "Keine Jobs gefunden für \"{{query}}\""
+  },
   "common": {
     "create": "Erstellen",
     "cancel": "Abbrechen"
