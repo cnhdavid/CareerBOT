@@ -12,7 +12,9 @@
     "language": "Sprache",
     "close": "Schließen",
     "de": "Deutsch",
-    "en": "Englisch"
+    "en": "Englisch",
+    "light": "Hell",
+    "dark": "Dunkel"
   },
   "login": {
     "title": "Anmelden",
@@ -44,7 +46,7 @@
     "discover": "Entdecken",
     "rooms": "Räume",
     "conversations": "Konversationen",
-    "interview": "Simuliertes Vorstellungsgespräch",
+    "interview": "Simuliertes Interview",
     "settings": "Einstellungen",
     "logout": "Abmelden"
   },
@@ -69,7 +71,7 @@
     "create": "Erstellen"
   },
   "interview": {
-    "title": "Simuliertes Vorstellungsgespräch",
+    "title": "Simuliertes espräch",
     "subtitle": "KI-gestütztes Übungsvorstellungsgespräch für Ihre Zielposition",
     "noJob": "Keine Zielposition gefunden",
     "noJobMessage": "Um ein simuliertes Vorstellungsgespräch zu starten, müssen Sie eine Zielposition in Ihrem Profil speichern.",
