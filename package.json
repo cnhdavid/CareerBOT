@@ -16,6 +16,8 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.25",
+    "html-pdf-node": "^1.0.8",
+    "html2pdf.js": "^0.14.0",
     "i18next": "^25.7.3",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.555.0",
@@ -31,6 +33,7 @@
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.0",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.6.0",
     "remark-gfm": "^4.0.1",
     "remove-accents": "^0.5.0"
   },

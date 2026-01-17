@@ -4,7 +4,9 @@ import Sidebar from "./components/Sidebar";
 import SettingsModal from "./components/SettingsModal";
 import ConversationsModal from "./components/ConversationsModal";
 import RoomsModal from "./components/RoomsModal";
+import DiscoverModal from "./components/DiscoverModal";
 import ProfileModal from "./components/ProfileModal";
+import InterviewModal from "./components/InterviewModal";
 import Chat from "./components/Chat";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -26,7 +28,9 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showConversations, setShowConversations] = useState(false);
   const [showRooms, setShowRooms] = useState(false);
+  const [showDiscover, setShowDiscover] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showInterview, setShowInterview] = useState(false);
   const [theme, setTheme] = useState('dark');
 
   const [input, setInput] = useState("");
@@ -98,6 +102,7 @@ export default function App() {
     setShowConversations(false);
     setShowRooms(false);
     setShowProfile(false);
+    setShowInterview(false);
   };
 
   const saveMessageWithId = async (convId, role, content, documentId = null, filename = null) => {
@@ -423,27 +428,48 @@ useEffect(() => {
         onSettings={() => {
           setShowConversations(false);
           setShowRooms(false);
+          setShowDiscover(false);
           setShowProfile(false);
           setShowSettings(true);
         }}
         onConversations={() => {
           setShowSettings(false);
           setShowRooms(false);
+          setShowDiscover(false);
           setShowProfile(false);
           setShowConversations(true);
         }}
         onRooms={() => {
           setShowSettings(false);
           setShowConversations(false);
+          setShowDiscover(false);
           setShowProfile(false);
           setShowRooms(true);
+        }}
+        onDiscover={() => {
+          setShowSettings(false);
+          setShowConversations(false);
+          setShowRooms(false);
+          setShowProfile(false);
+          setShowInterview(false);
+          setShowDiscover(true);
         }}
         onNewChat={newChat}
         onProfile={() => {
           setShowSettings(false);
           setShowConversations(false);
           setShowRooms(false);
+          setShowDiscover(false);
+          setShowInterview(false);
           setShowProfile(true);
+        }}
+        onInterview={() => {
+          setShowSettings(false);
+          setShowConversations(false);
+          setShowRooms(false);
+          setShowDiscover(false);
+          setShowProfile(false);
+          setShowInterview(true);
         }}
         onLogin={handleLoginFromSidebar}
         onSignup={handleSignupFromSidebar}
@@ -511,10 +537,26 @@ useEffect(() => {
         </>
       )}
 
+      {showDiscover && (
+        <>
+          <div className="overlay" onClick={() => setShowDiscover(false)} />
+          <DiscoverModal
+            onClose={() => setShowDiscover(false)}
+          />
+        </>
+      )}
+
       {showProfile && (
         <>
           <div className="overlay" onClick={() => setShowProfile(false)} />
           <ProfileModal onClose={() => setShowProfile(false)} />
+        </>
+      )}
+
+      {showInterview && (
+        <>
+          <div className="overlay" onClick={() => setShowInterview(false)} />
+          <InterviewModal onClose={() => setShowInterview(false)} />
         </>
       )}
 
