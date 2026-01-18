@@ -4,58 +4,87 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn .3s ease-in-out;
+  backdrop-filter: blur(4px);
 }
 
 .signup-cta-modal {
-  background-color: var(--bg-primary, #fff);
+  background-color: var(--bg-primary, var(--panel));
   border-radius: 1rem;
+  border: 1px solid rgba(102, 126, 234, 0.25);
   padding: 2rem;
   max-width: min(28.125rem, 90vw);
   width: 90%;
   position: relative;
-  box-shadow: 0 0.625rem 2.5rem rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(102, 126, 234, 0.15);
+  animation: slideUp .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .signup-cta-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: none;
-  border: none;
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.2);
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--text-secondary, #666);
-  width: 2rem;
-  height: 2rem;
+  color: rgba(102, 126, 234, 0.9);
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  border-radius: 0.625rem;
+  transition: all .2s ease;
   touch-action: manipulation;
 }
 
 .signup-cta-close:hover {
-  background-color: var(--bg-secondary, #f5f5f5);
+  background-color: rgba(102, 126, 234, 0.12);
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .signup-cta-content h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   font-size: clamp(1.25rem, 4vw, 1.5rem);
-  color: var(--text-color, #333);
+  color: var(--text-color, var(--text));
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: linear-gradient(135deg, var(--text), rgba(102, 126, 234, 0.8));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .signup-cta-content p {
   margin: 0 0 1.5rem 0;
-  color: var(--text-secondary, #666);
+  color: var(--text-secondary, var(--muted));
   font-size: clamp(0.875rem, 2.5vw, 1rem);
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .signup-cta-benefits {
@@ -65,39 +94,45 @@
 }
 
 .benefit-item {
-  padding: 0.75rem;
-  background-color: var(--bg-secondary, #f5f5f5);
-  border-radius: 0.5rem;
+  padding: 0.875rem;
+  background-color: rgba(102, 126, 234, 0.05);
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  border-radius: 0.625rem;
   font-size: clamp(0.875rem, 2vw, 0.95rem);
-  color: var(--text-color, #333);
+  color: var(--text-color, var(--text));
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .signup-cta-button {
   width: 100%;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.16), rgba(118, 75, 162, 0.12));
   color: white;
-  border: none;
-  border-radius: 0.5rem;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 0.75rem;
   font-size: clamp(0.9375rem, 2.5vw, 1rem);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
   margin-bottom: 0.75rem;
   touch-action: manipulation;
+  letter-spacing: 0.3px;
 }
 
 .signup-cta-button:hover {
-  transform: translateY(-0.125rem);
-  box-shadow: 0 0.25rem 0.75rem rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.25);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.16));
+  border-color: rgba(102, 126, 234, 0.4);
 }
 
 .signup-cta-dismiss {
   width: 100%;
   padding: 0.75rem;
   background: transparent;
-  color: var(--text-secondary, #666);
-  border: 1px solid var(--border-color, #e0e0e0);
+  color: rgba(102, 126, 234, 0.8);
+  border: 1.5px solid rgba(102, 126, 234, 0.25);
   border-radius: 0.5rem;
   font-size: clamp(0.875rem, 2vw, 0.95rem);
   cursor: pointer;

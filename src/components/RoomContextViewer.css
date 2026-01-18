@@ -1,31 +1,34 @@
 .room-context-viewer {
-  background: var(--input);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  background: rgba(102, 126, 234, 0.05);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 0.75rem;
   margin: 1rem 0;
+  box-shadow: inset 0 1px 0 rgba(102, 126, 234, 0.1);
 }
 
 .context-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 1rem;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.15);
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  background: rgba(102, 126, 234, 0.03);
 }
 
 .context-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex: 1;
   min-width: 0;
 }
 
 .room-name {
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 700;
+  color: rgba(102, 126, 234, 0.95);
+  letter-spacing: 0.3px;
 }
 
 .context-stats {
@@ -33,6 +36,8 @@
   color: var(--muted);
   margin-left: auto;
   margin-right: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 .context-content {
@@ -53,39 +58,43 @@
 .conversation-summaries h4 {
   margin: 0 0 0.75rem 0;
   font-size: 0.875rem;
-  color: var(--text);
+  color: rgba(102, 126, 234, 0.9);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .conversation-summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.375rem;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(102, 126, 234, 0.05);
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
 .conversation-summary:hover {
-  background: var(--hover);
-  border-color: var(--button-border);
+  background: rgba(102, 126, 234, 0.08);
+  border-color: rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
 }
 
 .conversation-summary.selected {
-  background: var(--hover);
-  border-color: var(--button-border);
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  background: rgba(102, 126, 234, 0.12);
+  border-color: rgba(102, 126, 234, 0.35);
+  box-shadow: inset 0 1px 0 rgba(102, 126, 234, 0.1), 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .conv-info {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.25rem;
   flex: 1;
   min-width: 0;
 }
@@ -93,10 +102,11 @@
 .conv-name {
   font-size: 0.8125rem;
   color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: 0.2px;
 }
 
 .conv-stats {
