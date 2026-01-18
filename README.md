@@ -10,8 +10,11 @@ AI-powered career guidance chatbot built with Next.js, React, and OpenAI.
 - **CV Analysis**: Upload and analyze resumes (PDF, DOCX, TXT)
 - **Profile Management**: Comprehensive career profile with experience and education
 - **Conversation Management**: Save and organize chat history
-- **Room System**: Group related conversations together
+- **Room System**: Group related conversations 
+- **Job Matching**: Semantic job search and matching based on profile
+- **Interview Preparation**: AI-powered interview question generation and review
 - **File Upload**: Document analysis with AI feedback
+- **Input Validation**: Comprehensive profanity filtering and content moderation
 - **Multi-language Support**: i18n (German/English)
 - **Theme Support**: Dark/light mode with system preference detection
 - **Mobile Responsive**: Optimized for all device sizes
@@ -137,16 +140,35 @@ CareerBOT/
 │   ├── models/                 # Mongoose models
 │   │   ├── User.js
 │   │   ├── Conversation.js
-│   │   └── Room.js
+│   │   ├── Room.js
+│   │   └── File.js
 │   ├── db.js                   # Database connection
 │   ├── auth.js                 # Auth utilities
-│   └── constants.js            # System prompts
+│   ├── constants.js            # System prompts
+│   ├── inputValidation.js      # Input validation & profanity filter
+│   ├── mockJobs.js             # Mock job data for testing
+│   └── generateConversationTitle.js  # Auto-generate conversation titles
 ├── src/                         # React components
 │   ├── components/             # UI components
 │   │   ├── Chat.jsx
 │   │   ├── Login.jsx
+│   │   ├── Signup.jsx
 │   │   ├── Sidebar.jsx
-│   │   └── ...
+│   │   ├── Topbar.jsx
+│   │   ├── ProfileModal.jsx
+│   │   ├── RoomsModal.jsx
+│   │   ├── ConversationsModal.jsx
+│   │   ├── SettingsModal.jsx
+│   │   ├── InterviewModal.jsx
+│   │   ├── DiscoverModal.jsx
+│   │   ├── SemanticJobMatcher.jsx
+│   │   ├── RoomContextViewer.jsx
+│   │   ├── ResourcesPanel.jsx
+│   │   ├── OpenAIDisclaimer.jsx
+│   │   ├── GuestModeIndicator.jsx
+│   │   ├── SignupCTA.jsx
+│   │   ├── ScoreBreakdownChart.jsx
+│   │   └── NavItem.jsx
 │   ├── contexts/               # React contexts
 │   │   └── AuthContext.jsx
 │   ├── hooks/                  # Custom hooks
@@ -169,6 +191,7 @@ All API routes are accessible at `/api/*`:
 - `POST /api/auth/logout` - Logout and clear session
 - `GET /api/auth/me` - Get current user (supports guest mode)
 - `PUT /api/auth/me` - Update user profile
+- `POST /api/auth/reset-profile` - Reset user profile data
 
 ### Conversations
 - `GET /api/conversations` - List all conversations
@@ -181,11 +204,29 @@ All API routes are accessible at `/api/*`:
 ### Chat & Analysis
 - `POST /api/answer` - Send message to AI (supports guest mode)
 - `POST /api/upload` - Upload and analyze document
+- `POST /api/upload-file` - Upload file to room
 - `POST /api/analyze-cv` - Analyze CV/resume
 
 ### Rooms
 - `GET /api/rooms` - List all rooms
 - `POST /api/rooms` - Create new room
+- `GET /api/rooms/[id]` - Get specific room
+- `PUT /api/rooms/[id]` - Update room details
+- `DELETE /api/rooms/[id]` - Delete room
+- `POST /api/rooms/[id]/files` - Upload files to room
+
+### Job Matching
+- `POST /api/match-jobs` - Match jobs to user profile using semantic search
+- `POST /api/jobApi` - Fetch jobs from external API
+- `POST /api/generate-job-filters` - Generate job search filters
+
+### Interview Preparation
+- `POST /api/interview/generate` - Generate interview questions
+- `POST /api/interview/review` - Review interview answers
+- `GET /api/interview/review/[id]` - Get interview review results
+
+### System
+- `GET /api/health` - Health check endpoint
 
 ## 🚀 Deployment to Vercel
 
@@ -241,12 +282,16 @@ npm run lint     # Run ESLint
 ### Tech Stack
 
 - **Framework**: Next.js 15 (App Router)
-- **Frontend**: React 19, Framer Motion
+- **Frontend**: React 19, Framer Motion, Lucide React (icons)
 - **Backend**: Next.js API Routes
 - **Database**: MongoDB with Mongoose
 - **AI**: OpenAI GPT-4o-mini
 - **Auth**: JWT with HTTP-only cookies
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4
+- **Charts**: Recharts
+- **File Processing**: PDF Parse, Mammoth (DOCX), PDF2JSON
+- **Content Moderation**: Bad-words, Naughty-words
+- **Markdown**: React-Markdown with Remark-GFM
 - **Deployment**: Vercel
 
 ### Environment Variables
