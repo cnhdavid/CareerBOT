@@ -556,7 +556,7 @@ useEffect(() => {
       {showInterview && (
         <>
           <div className="overlay" onClick={() => setShowInterview(false)} />
-          <InterviewModal onClose={() => setShowInterview(false)} />
+          <InterviewModal onClose={() => setShowInterview(false)} theme={theme} />
         </>
       )}
 

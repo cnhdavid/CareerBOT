@@ -5,9 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 import ScoreBreakdownChart from "./ScoreBreakdownChart";
 import "./InterviewModal.css";
 
-export default function InterviewModal({ onClose }) {
-  const { t } = useTranslation();
+export default function InterviewModal({ onClose, theme = 'dark' }) {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const currentLanguage = i18n.language || 'en';
 
   const [stage, setStage] = useState("start"); // "start", "loading", "interview", "review"
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -24,6 +25,14 @@ export default function InterviewModal({ onClose }) {
 
   const targetJob = user?.targetPosition || null;
 
+  // Re-fetch questions when language changes
+  useEffect(() => {
+    if (stage === 'interview' && questions.length > 0) {
+      // If user changes language while in interview, stay in current interview
+      // (do not auto-fetch new questions to preserve user's progress)
+    }
+  }, [currentLanguage, stage]);
+
   // Fetch questions from API when starting interview
   const fetchInterviewQuestions = async () => {
     if (!targetJob) return;
@@ -35,6 +44,9 @@ export default function InterviewModal({ onClose }) {
       const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language: currentLanguage
+        }),
         credentials: "include",
       });
 

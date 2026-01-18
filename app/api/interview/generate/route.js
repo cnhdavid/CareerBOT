@@ -57,6 +57,9 @@ export async function POST(request) {
       );
     }
 
+    const body = await request.json();
+    const language = body.language || 'en';
+
     await connectDB();
     const user = await User.findById(userId).select("targetPosition experience education skills summary");
     
@@ -90,13 +93,14 @@ export async function POST(request) {
       userContext += `Education: ${latestEdu.degree} in ${latestEdu.field}\n`;
     }
 
-    const systemPrompt = `You are an expert technical interview coach and hiring manager. Generate a professional, realistic interview for a ${user.targetPosition} position.
+    const systemPrompt = `You are an expert technical interview coach and hiring manager. Generate a professional, realistic interview for a ${user.targetPosition} position in ${language.toUpperCase()}.
 
 Create 7 interview questions that are:
 - Tailored to the specific role and candidate background
 - Mix of behavioral, technical, situational, and communication questions
 - Realistic and fair (no age/family/discriminatory questions)
 - End with a professional closing question
+- Written in ${language === 'de' ? 'German' : language === 'es' ? 'Spanish' : language === 'fr' ? 'French' : 'English'}
 
 Focus on questions that reveal competence, cultural fit, and growth potential.
 
@@ -112,7 +116,7 @@ ${userContext}`;
         },
         {
           role: "user",
-          content: `Generate 7 interview questions for a ${user.targetPosition} role. Return the result as valid JSON matching this schema: ${JSON.stringify(INTERVIEW_QUESTIONS_SCHEMA)}`
+          content: `Generate 7 interview questions for a ${user.targetPosition} role in ${language}. Return the result as valid JSON matching this schema: ${JSON.stringify(INTERVIEW_QUESTIONS_SCHEMA)}`
         }
       ],
       temperature: 1,
