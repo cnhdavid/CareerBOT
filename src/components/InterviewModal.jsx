@@ -5,9 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 import ScoreBreakdownChart from "./ScoreBreakdownChart";
 import "./InterviewModal.css";
 
-export default function InterviewModal({ onClose }) {
-  const { t } = useTranslation();
+export default function InterviewModal({ onClose, theme = 'dark' }) {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const currentLanguage = i18n.language || 'en';
 
   const [stage, setStage] = useState("start"); // "start", "loading", "interview", "review"
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -35,6 +36,9 @@ export default function InterviewModal({ onClose }) {
       const response = await fetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language: currentLanguage
+        }),
         credentials: "include",
       });
 
