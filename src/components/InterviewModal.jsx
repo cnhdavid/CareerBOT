@@ -25,6 +25,14 @@ export default function InterviewModal({ onClose, theme = 'dark' }) {
 
   const targetJob = user?.targetPosition || null;
 
+  // Re-fetch questions when language changes
+  useEffect(() => {
+    if (stage === 'interview' && questions.length > 0) {
+      // If user changes language while in interview, stay in current interview
+      // (do not auto-fetch new questions to preserve user's progress)
+    }
+  }, [currentLanguage, stage]);
+
   // Fetch questions from API when starting interview
   const fetchInterviewQuestions = async () => {
     if (!targetJob) return;

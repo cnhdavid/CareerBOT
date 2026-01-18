@@ -26,4 +26,4 @@ out
 *.njsproj
 *.sln
 *.sw?
-/server/.env
+.env.local

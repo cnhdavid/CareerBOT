@@ -63,6 +63,7 @@
     "confirmDelete": "Sind Sie sicher, dass Sie diese Konversation löschen möchten?"
   },
   "rooms": {
+    "createRoom": "Raum erstellen",
     "title": "Räume",
     "noRooms": "Keine Räume gefunden. Erstellen Sie Ihren ersten Raum!",
     "joinRoom": "Raum beitreten",
@@ -71,13 +72,13 @@
     "create": "Erstellen"
   },
   "interview": {
-    "title": "Simuliertes espräch",
+    "title": "Simuliertes Vorstellungsgespräch",
     "subtitle": "KI-gestütztes Übungsvorstellungsgespräch für Ihre Zielposition",
     "noJob": "Keine Zielposition gefunden",
     "noJobMessage": "Um ein simuliertes Vorstellungsgespräch zu starten, müssen Sie eine Zielposition in Ihrem Profil speichern.",
     "goToProfile": "Zum Profil",
     "interviewFor": "Vorstellungsgespräch für:",
-    "questionsInfo": "Sie werden 5-10 maßgeschneiderte Fragen basierend auf Ihrer Zielposition gestellt. Nehmen Sie sich Zeit für durchdachte Antworten.",
+    "questionsInfo": "Sie werden 7 maßgeschneiderte Fragen basierend auf Ihrer Zielposition gestellt. Nehmen Sie sich Zeit für durchdachte Antworten.",
     "start": "Vorstellungsgespräch starten",
     "progress": "Frage {{current}} von {{total}}",
     "answerPlaceholder": "Geben Sie Ihre Antwort hier ein...",
@@ -96,7 +97,16 @@
     "nextSteps": "Nächste Schritte zum Üben",
     "roleTips": "Tipps für diese Rolle",
     "retry": "Erneut üben",
-    "exportReview": "Feedback exportieren"
+    "exportReview": "Feedback exportieren",
+    "feedback": "Feedback",
+    "rating": "Bewertung",
+    "excellent": "Hervorragend",
+    "good": "Gut",
+    "fair": "Befriedigend",
+    "needsImprovement": "Verbesserungsbedürftig",
+    "viewMore": "Mehr anzeigen",
+    "viewLess": "Weniger anzeigen",
+    "exportPDF": "Als PDF exportieren"
   },
   "discover": {
     "title": "Entdecken",
