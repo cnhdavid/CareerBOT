@@ -110,7 +110,7 @@ export default function DiscoverModal({ onClose }) {
           {/* Search Query */}
           <input
             type="text"
-            placeholder="Job title or position..."
+            placeholder={t('discover.jobTitlePlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -127,7 +127,7 @@ export default function DiscoverModal({ onClose }) {
           {/* Location */}
           <input
             type="text"
-            placeholder="Location (e.g., Berlin, Germany)"
+            placeholder={t('discover.locationPlaceholder')}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             style={{
@@ -147,10 +147,10 @@ export default function DiscoverModal({ onClose }) {
                 {loadingSuggestions ? (
                   <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
                     <Loader size={12} style={{ animation: "spin 1s linear infinite" }} />
-                    Generating suggestions...
+                    {t('discover.generatingSuggestions')}
                   </span>
                 ) : (
-                  "Based on your profile:"
+                  t('discover.basedOnProfile')
                 )}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -194,7 +194,7 @@ export default function DiscoverModal({ onClose }) {
                 onChange={(e) => setRemote(e.target.checked)}
                 style={{ cursor: "pointer" }}
               />
-              Remote only
+              {t('discover.remoteOnly')}
             </label>
             <button
               onClick={handleSearch}
@@ -213,7 +213,7 @@ export default function DiscoverModal({ onClose }) {
                 transition: "all 0.2s ease",
               }}
             >
-              {loading ? "Searching..." : "Search"}
+              {loading ? t('discover.searching') : t('discover.search')}
             </button>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function DiscoverModal({ onClose }) {
         {jobs.length > 0 && (
           <div>
             <p style={{ fontSize: "0.875rem", opacity: 0.7, marginBottom: "0.75rem" }}>
-              Found {jobs.length} job{jobs.length !== 1 ? "s" : ""}
+              {t('discover.foundJobs', { count: jobs.length, plural: jobs.length !== 1 ? "s" : "" })}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", maxHeight: "60vh", overflowY: "auto" }}>
               {jobs.map((job) => (
@@ -261,7 +261,7 @@ export default function DiscoverModal({ onClose }) {
                       textDecoration: "none",
                     }}
                   >
-                    View Job →
+                    {t('discover.viewJob')}
                   </a>
                 </div>
               ))}
@@ -271,7 +271,7 @@ export default function DiscoverModal({ onClose }) {
 
         {!loading && jobs.length === 0 && !error && query && (
           <p style={{ textAlign: "center", opacity: 0.6, fontSize: "0.875rem" }}>
-            No jobs found for "{query}"
+            {t('discover.noJobsFound', { query })}
           </p>
         )}
       </div>

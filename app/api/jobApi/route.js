@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { filterMockJobs } from "@/lib/mockJobs";
 
 /**
  * POST /api/jobapi
@@ -18,10 +19,13 @@ export async function POST(request) {
     }
 
     if (!process.env.JOB_API_KEY) {
-      return NextResponse.json(
-        { error: "JOB_API_KEY not configured" },
-        { status: 500 }
-      );
+      console.warn("⚠️ JOB_API_KEY not configured, using mock data for development");
+      const jobs = filterMockJobs(query, location, remote);
+      return NextResponse.json({
+        count: jobs.length,
+        jobs,
+        mock: true,
+      });
     }
 
     // Build search query with location and remote filters
@@ -33,48 +37,61 @@ export async function POST(request) {
       searchQuery += " remote";
     }
 
-    const response = await fetch(
-      "https://api.apijobs.dev/v1/job/search",
-      {
-        method: "POST",
-        headers: {
-          apikey: process.env.JOB_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          q: searchQuery,
-        }),
-      }
-    );
+    console.log("🔑 Using API key:", process.env.JOB_API_KEY.substring(0, 10) + "...");
+    console.log("🔍 Search query:", query, "Location:", location);
+
+    // Jooble API: URL includes the API key as path parameter
+    const joobleUrl = `https://jooble.org/api/${process.env.JOB_API_KEY}`;
+
+    // Build Jooble request body
+    const requestBody = {
+      keywords: query,
+      location: location || "",
+    };
+
+    const response = await fetch(joobleUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("❌ APIJobs error:", errorText);
+      console.warn("⚠️ Falling back to mock data due to API error");
 
-      return NextResponse.json(
-        { error: "Job API request failed" },
-        { status: response.status }
-      );
+      const jobs = filterMockJobs(query, location, remote);
+      return NextResponse.json({
+        count: jobs.length,
+        jobs,
+        mock: true,
+        error: "External API unavailable, showing sample data",
+      });
     }
 
     const data = await response.json();
 
-    console.log("✅ Job API success:", {
-      count: data?.count,
+    console.log("✅ Jooble API success:", {
+      totalCount: data?.totalCount,
+      jobsReturned: data?.jobs?.length,
     });
 
     /**
-     * Optional: Response vereinfachen
-     * (Frontend-freundlich)
+     * Transform Jooble response to frontend-friendly format
+     * Jooble returns: { totalCount, jobs: [...] }
      */
-    const jobs = (data?.hits || []).map(job => ({
-      id: job.id,
+    const jobs = (data?.jobs || []).map((job, index) => ({
+      id: job.id || `jooble-${index}-${Date.now()}`,
       title: job.title,
-      company: job.company_name,
+      company: job.company,
       location: job.location,
-      remote: job.remote,
-      url: job.url,
-      publishedAt: job.published_at,
+      remote: job.type?.toLowerCase().includes('remote') || false,
+      url: job.link,
+      publishedAt: job.updated,
+      description: job.snippet,
+      salary: job.salary,
     }));
 
     return NextResponse.json({
@@ -83,9 +100,22 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error("🔥 Job API error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.warn("⚠️ Falling back to mock data due to error");
+    
+    try {
+      const { query, location, remote } = await request.json();
+      const jobs = filterMockJobs(query, location, remote);
+      return NextResponse.json({
+        count: jobs.length,
+        jobs,
+        mock: true,
+        error: "Service temporarily unavailable, showing sample data",
+      });
+    } catch (fallbackErr) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
   }
 }
