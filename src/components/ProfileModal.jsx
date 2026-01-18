@@ -239,10 +239,23 @@ export default function ProfileModal({ onClose }) {
           targetPosition: extractedData.targetPosition || "",
           experience: extractedData.experience && extractedData.experience.length > 0 
             ? extractedData.experience 
-            : [],
+            : [{
+                company: "",
+                position: "",
+                startDate: "",
+                endDate: "",
+                description: ""
+              }],
           education: extractedData.education && extractedData.education.length > 0
             ? extractedData.education
-            : [],
+            : [{
+                institution: "",
+                degree: "",
+                field: "",
+                startDate: "",
+                endDate: "",
+                gpa: ""
+              }],
           skills: extractedData.skills || "",
           languages: extractedData.languages || "",
           certifications: extractedData.certifications || "",
@@ -253,25 +266,40 @@ export default function ProfileModal({ onClose }) {
         // Auto-save the CV data to database
         try {
           console.log('[Frontend] Auto-saving CV data to database...');
+          
+          // Helper function to ensure string values
+          const ensureString = (value) => {
+            if (Array.isArray(value)) return "";
+            return value || "";
+          };
+          
           const saveData = {
-            name: extractedData.name || "",
-            surname: extractedData.surname || "",
-            phone: extractedData.phone || "",
-            address: extractedData.address || "",
-            city: extractedData.city || "",
-            country: extractedData.country || "",
-            postalCode: extractedData.postalCode || "",
-            linkedin: extractedData.linkedin || "",
-            github: extractedData.github || "",
-            portfolio: extractedData.portfolio || "",
-            summary: extractedData.summary || "",
-            targetPosition: extractedData.targetPosition || "",
-            experience: JSON.stringify(extractedData.experience || []),
-            education: JSON.stringify(extractedData.education || []),
-            skills: extractedData.skills || "",
-            languages: extractedData.languages || "",
-            certifications: extractedData.certifications || "",
-            references: extractedData.references || ""
+            name: ensureString(extractedData.name),
+            surname: ensureString(extractedData.surname),
+            phone: ensureString(extractedData.phone),
+            address: ensureString(extractedData.address),
+            city: ensureString(extractedData.city),
+            country: ensureString(extractedData.country),
+            postalCode: ensureString(extractedData.postalCode),
+            linkedin: ensureString(extractedData.linkedin),
+            github: ensureString(extractedData.github),
+            portfolio: ensureString(extractedData.portfolio),
+            summary: ensureString(extractedData.summary),
+            targetPosition: ensureString(extractedData.targetPosition),
+            experience: JSON.stringify(
+              extractedData.experience && Array.isArray(extractedData.experience) && extractedData.experience.length > 0
+                ? extractedData.experience
+                : [{company: "", position: "", startDate: "", endDate: "", description: ""}]
+            ),
+            education: JSON.stringify(
+              extractedData.education && Array.isArray(extractedData.education) && extractedData.education.length > 0
+                ? extractedData.education
+                : [{institution: "", degree: "", field: "", startDate: "", endDate: "", gpa: ""}]
+            ),
+            skills: ensureString(extractedData.skills),
+            languages: ensureString(extractedData.languages),
+            certifications: ensureString(extractedData.certifications),
+            references: ensureString(extractedData.references)
           };
           
           await updateUser(saveData);
@@ -290,6 +318,78 @@ export default function ProfileModal({ onClose }) {
     } finally {
       setCvUploadLoading(false);
       e.target.value = '';
+    }
+  };
+
+  const handleResetProfile = async () => {
+    if (!window.confirm('Are you sure you want to reset your profile? This will clear all data except your email and password.')) {
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      console.log('[Frontend] Resetting profile...');
+      const response = await fetch('/api/auth/reset-profile', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reset profile');
+      }
+
+      console.log('[Frontend] Profile reset successful');
+      
+      // Update local form data
+      setFormData({
+        email: user.email || "",
+        password: "",
+        name: "",
+        surname: "",
+        birthday: "",
+        targetPosition: "",
+        cvFile: null,
+        phone: "",
+        address: "",
+        city: "",
+        country: "",
+        postalCode: "",
+        linkedin: "",
+        github: "",
+        portfolio: "",
+        summary: "",
+        experience: [{
+          company: "",
+          position: "",
+          startDate: "",
+          endDate: "",
+          description: ""
+        }],
+        education: [{
+          institution: "",
+          degree: "",
+          field: "",
+          startDate: "",
+          endDate: "",
+          gpa: ""
+        }],
+        skills: "",
+        languages: "",
+        certifications: "",
+        references: ""
+      });
+
+      // Reload user data
+      window.location.reload();
+    } catch (err) {
+      console.error('[Frontend] Reset error:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -501,69 +601,63 @@ export default function ProfileModal({ onClose }) {
 
             <div className="cv-form-section">
               <h3>Work Experience</h3>
-              {formData.experience.length === 0 ? (
-                <p style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                  No work experience found in CV. Click "Add Experience" to add manually.
-                </p>
-              ) : (
-                formData.experience.map((exp, index) => (
-                  <div key={index} className="experience-item">
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Company</label>
-                        <input
-                          type="text"
-                          value={exp.company}
-                          onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
-                          placeholder="Company Name"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Position</label>
-                        <input
-                          type="text"
-                          value={exp.position}
-                          onChange={(e) => handleExperienceChange(index, 'position', e.target.value)}
-                          placeholder="Job Title"
-                        />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Start Date</label>
-                        <input
-                          type="month"
-                          value={exp.startDate}
-                          onChange={(e) => handleExperienceChange(index, 'startDate', e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>End Date</label>
-                        <input
-                          type="month"
-                          value={exp.endDate}
-                          onChange={(e) => handleExperienceChange(index, 'endDate', e.target.value)}
-                          placeholder="Present"
-                        />
-                      </div>
-                    </div>
+              {formData.experience.map((exp, index) => (
+                <div key={index} className="experience-item">
+                  <div className="form-row">
                     <div className="form-group">
-                      <label>Description</label>
-                      <textarea
-                        value={exp.description}
-                        onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
-                        placeholder="Describe your responsibilities and achievements"
-                        rows={3}
+                      <label>Company</label>
+                      <input
+                        type="text"
+                        value={exp.company}
+                        onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
+                        placeholder="Company Name"
                       />
                     </div>
-                    {formData.experience.length > 1 && (
-                      <button type="button" onClick={() => removeExperience(index)} className="remove-btn">
-                        Remove Experience
-                      </button>
-                    )}
+                    <div className="form-group">
+                      <label>Position</label>
+                      <input
+                        type="text"
+                        value={exp.position}
+                        onChange={(e) => handleExperienceChange(index, 'position', e.target.value)}
+                        placeholder="Job Title"
+                      />
+                    </div>
                   </div>
-                ))
-              )}
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Start Date</label>
+                      <input
+                        type="month"
+                        value={exp.startDate}
+                        onChange={(e) => handleExperienceChange(index, 'startDate', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>End Date</label>
+                      <input
+                        type="month"
+                        value={exp.endDate}
+                        onChange={(e) => handleExperienceChange(index, 'endDate', e.target.value)}
+                        placeholder="Present"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Description</label>
+                    <textarea
+                      value={exp.description}
+                      onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
+                      placeholder="Describe your responsibilities and achievements"
+                      rows={3}
+                    />
+                  </div>
+                  {formData.experience.length > 1 && (
+                    <button type="button" onClick={() => removeExperience(index)} className="remove-btn">
+                      Remove Experience
+                    </button>
+                  )}
+                </div>
+              ))}
               <button type="button" onClick={addExperience} className="add-btn">
                 Add Experience
               </button>
@@ -571,79 +665,73 @@ export default function ProfileModal({ onClose }) {
 
             <div className="cv-form-section">
               <h3>Education</h3>
-              {formData.education.length === 0 ? (
-                <p style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                  No education found in CV. Click "Add Education" to add manually.
-                </p>
-              ) : (
-                formData.education.map((edu, index) => (
-                  <div key={index} className="education-item">
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Institution</label>
-                        <input
-                          type="text"
-                          value={edu.institution}
-                          onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                          placeholder="University Name"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Degree</label>
-                        <input
-                          type="text"
-                          value={edu.degree}
-                          onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
-                          placeholder="Bachelor's, Master's, etc."
-                        />
-                      </div>
+              {formData.education.map((edu, index) => (
+                <div key={index} className="education-item">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Institution</label>
+                      <input
+                        type="text"
+                        value={edu.institution}
+                        onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                        placeholder="University Name"
+                      />
                     </div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Field of Study</label>
-                        <input
-                          type="text"
-                          value={edu.field}
-                          onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
-                          placeholder="Computer Science, Business, etc."
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>GPA (optional)</label>
-                        <input
-                          type="text"
-                          value={edu.gpa}
-                          onChange={(e) => handleEducationChange(index, 'gpa', e.target.value)}
-                          placeholder="3.8"
-                        />
-                      </div>
+                    <div className="form-group">
+                      <label>Degree</label>
+                      <input
+                        type="text"
+                        value={edu.degree}
+                        onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                        placeholder="Bachelor's, Master's, etc."
+                      />
                     </div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Start Date</label>
-                        <input
-                          type="month"
-                          value={edu.startDate}
-                          onChange={(e) => handleEducationChange(index, 'startDate', e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>End Date</label>
-                        <input
-                          type="month"
-                          value={edu.endDate}
-                          onChange={(e) => handleEducationChange(index, 'endDate', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    {formData.education.length > 1 && (
-                      <button type="button" onClick={() => removeEducation(index)} className="remove-btn">
-                        Remove Education
-                      </button>
-                    )}
                   </div>
-                ))
-              )}
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Field of Study</label>
+                      <input
+                        type="text"
+                        value={edu.field}
+                        onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
+                        placeholder="Computer Science, Business, etc."
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>GPA (optional)</label>
+                      <input
+                        type="text"
+                        value={edu.gpa}
+                        onChange={(e) => handleEducationChange(index, 'gpa', e.target.value)}
+                        placeholder="3.8"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Start Date</label>
+                      <input
+                        type="month"
+                        value={edu.startDate}
+                        onChange={(e) => handleEducationChange(index, 'startDate', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>End Date</label>
+                      <input
+                        type="month"
+                        value={edu.endDate}
+                        onChange={(e) => handleEducationChange(index, 'endDate', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  {formData.education.length > 1 && (
+                    <button type="button" onClick={() => removeEducation(index)} className="remove-btn">
+                      Remove Education
+                    </button>
+                  )}
+                </div>
+              ))}
               <button type="button" onClick={addEducation} className="add-btn">
                 Add Education
               </button>
@@ -720,6 +808,15 @@ export default function ProfileModal({ onClose }) {
           className="upload-cv-btn"
         >
           {cvUploadLoading ? 'Analyzing CV...' : 'Upload CV'}
+        </button>
+        <button 
+          type="button"
+          onClick={handleResetProfile}
+          disabled={loading}
+          className="reset-profile-btn"
+          style={{ marginLeft: '10px', backgroundColor: '#dc3545', color: 'white' }}
+        >
+          {loading ? 'Resetting...' : 'Reset Profile'}
         </button>
         {cvUploadLoading && (
           <p className="upload-status">Analyzing your CV and populating the form...</p>

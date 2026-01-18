@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { getCurrentUser } from "@/lib/auth";
-import PDFParser from "pdf2json";
+import pdfParse from "pdf-parse";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -54,62 +54,17 @@ export async function POST(request) {
     } else if (cvFile.type === 'application/pdf') {
       console.log('[CV Analysis] Processing as PDF file');
       try {
-        // Use pdf2json for Next.js compatibility
-        const pdfParser = new PDFParser();
+        // Use pdf-parse for better text extraction
+        console.log('[CV Analysis] Starting PDF parsing with pdf-parse...');
+        const pdfData = await pdfParse(buffer);
         
-        // Wrap parseBuffer in a Promise
-        cvText = await new Promise((resolve, reject) => {
-          pdfParser.on('pdfParser_dataError', (errData) => {
-            console.error('[CV Analysis] PDF parser error:', errData.parserError);
-            reject(new Error(errData.parserError));
-          });
-          
-          pdfParser.on('pdfParser_dataReady', (pdfData) => {
-            try {
-              console.log('[CV Analysis] PDF data ready, extracting text...');
-              
-              // Extract text from all pages
-              let extractedText = '';
-              
-              if (pdfData.Pages && Array.isArray(pdfData.Pages)) {
-                console.log('[CV Analysis] PDF loaded, pages:', pdfData.Pages.length);
-                
-                pdfData.Pages.forEach((page, pageIndex) => {
-                  if (page.Texts && Array.isArray(page.Texts)) {
-                    const pageText = page.Texts
-                      .map(text => {
-                        if (text.R && Array.isArray(text.R)) {
-                          return text.R.map(r => decodeURIComponent(r.T || '')).join(' ');
-                        }
-                        return '';
-                      })
-                      .filter(Boolean)
-                      .join(' ');
-                    
-                    extractedText += pageText + '\n';
-                    console.log(`[CV Analysis] Page ${pageIndex + 1}/${pdfData.Pages.length} extracted, length: ${pageText.length}`);
-                  }
-                });
-              }
-              
-              const finalText = extractedText.trim();
-              console.log('[CV Analysis] PDF text extracted successfully, total length:', finalText.length);
-              
-              if (!finalText) {
-                reject(new Error('No text could be extracted from the PDF. The PDF may be image-based or corrupted.'));
-              } else {
-                resolve(finalText);
-              }
-            } catch (extractError) {
-              console.error('[CV Analysis] Text extraction error:', extractError);
-              reject(extractError);
-            }
-          });
-          
-          // Parse the buffer
-          console.log('[CV Analysis] Starting PDF parsing...');
-          pdfParser.parseBuffer(buffer);
-        });
+        cvText = pdfData.text || "";
+        console.log('[CV Analysis] PDF text extracted successfully, length:', cvText.length);
+        console.log('[CV Analysis] PDF pages:', pdfData.numpages);
+        
+        if (!cvText || cvText.trim().length === 0) {
+          throw new Error('No text could be extracted from the PDF. The PDF may be image-based, password-protected, or corrupted.');
+        }
         
       } catch (pdfError) {
         console.error('[CV Analysis] PDF parsing error:', pdfError);
@@ -165,65 +120,89 @@ export async function POST(request) {
 
     console.log('[CV Analysis] Text extraction successful, preview:', cvText.substring(0, 200));
     console.log('[CV Analysis] Extracted Text length:', cvText.length);
+    console.log('[CV Analysis] Full extracted text (first 1000 chars):', cvText.substring(0, 1000));
+    console.log('[CV Analysis] Full extracted text (last 500 chars):', cvText.substring(Math.max(0, cvText.length - 500)));
 
     const analysisPrompt = `
-    You are a CV/resume analysis expert. Extract REAL information from the following CV text.
+    You are an expert CV/resume parser. Carefully analyze the following CV text and extract ALL available information.
 
     CV TEXT TO ANALYZE:
     ${cvText}
 
-    YOUR TASK:
-    Extract ONLY the information that is actually present in the CV text above.
-    Do NOT make up, invent, or generate any information that is not explicitly stated in the text.
-    If information is not found, use empty strings or empty arrays.
+    EXTRACTION GUIDELINES:
+    1. **Personal Information**: Look for name (first and last name), phone numbers, email addresses, physical addresses, city, country, postal codes
+    2. **Professional Profiles**: Extract LinkedIn, GitHub, portfolio URLs, or any social media links
+    3. **Summary/Objective**: Look for professional summary, career objective, or "About Me" sections
+    4. **Work Experience**: Extract ALL job positions with:
+       - Company/employer name
+       - Job title/position
+       - Start and end dates (convert to YYYY-MM format if possible, e.g., "2020-01" for January 2020)
+       - Job description, responsibilities, and achievements
+    5. **Education**: Extract ALL educational background with:
+       - Institution/university name
+       - Degree type (Bachelor's, Master's, PhD, etc.)
+       - Field of study/major
+       - Start and end dates (YYYY-MM format)
+       - GPA or grades if mentioned
+    6. **Skills**: Extract technical skills, soft skills, tools, technologies, programming languages
+    7. **Languages**: Extract spoken/written languages with proficiency levels if mentioned
+    8. **Certifications**: Extract professional certifications, licenses, courses
+    9. **Target Position**: Look for desired position, job title seeking, or career goals
+
+    IMPORTANT NOTES:
+    - The CV may be in German or English - extract information from both languages
+    - Common German terms: "Berufserfahrung" (work experience), "Ausbildung" (education), "Fähigkeiten" (skills), "Sprachen" (languages)
+    - Be thorough - extract ALL work experiences and education entries, not just the most recent
+    - For dates: "seit" or "since" means ongoing (use empty string for endDate)
+    - Combine related information intelligently (e.g., multiple skill mentions into one skills field)
+    - If multiple entries exist for experience or education, include ALL of them in the arrays
 
     REQUIRED JSON FORMAT:
     {
-      "name": "",
-      "surname": "",
-      "phone": "",
-      "address": "",
-      "city": "",
-      "country": "",
-      "postalCode": "",
-      "email": "",
-      "linkedin": "",
-      "github": "",
-      "portfolio": "",
-      "summary": "",
-      "targetPosition": "",
+      "name": "First name only",
+      "surname": "Last name only",
+      "phone": "Phone number with country code if available",
+      "address": "Street address",
+      "city": "City name",
+      "country": "Country name",
+      "postalCode": "Postal/ZIP code",
+      "email": "Email address",
+      "linkedin": "LinkedIn URL",
+      "github": "GitHub URL",
+      "portfolio": "Portfolio or personal website URL",
+      "summary": "Professional summary or objective",
+      "targetPosition": "Desired job title or position",
       "experience": [
         {
-          "company": "",
-          "position": "",
-          "startDate": "",
-          "endDate": "",
-          "description": ""
+          "company": "Company name",
+          "position": "Job title",
+          "startDate": "YYYY-MM format",
+          "endDate": "YYYY-MM format or empty if current",
+          "description": "Job responsibilities and achievements"
         }
       ],
       "education": [
         {
-          "institution": "",
-          "degree": "",
-          "field": "",
-          "startDate": "",
-          "endDate": "",
-          "gpa": ""
+          "institution": "School/University name",
+          "degree": "Degree type",
+          "field": "Field of study",
+          "startDate": "YYYY-MM format",
+          "endDate": "YYYY-MM format",
+          "gpa": "Grade or GPA if mentioned"
         }
       ],
-      "skills": "",
-      "languages": "",
-      "certifications": "",
-      "references": ""
+      "skills": "Comma-separated list of all skills",
+      "languages": "Comma-separated list of languages with proficiency",
+      "certifications": "List of certifications and courses",
+      "references": "Reference information if provided"
     }
 
-    CRITICAL INSTRUCTIONS:
-    1. Extract ONLY information that is explicitly written in the CV text
-    2. Do NOT generate or invent any data
-    3. If a field is not mentioned in the CV, leave it as an empty string
-    4. For dates, use the exact format found in the CV or convert to MM/YYYY
-    5. Return ONLY the JSON object - no markdown, no explanations
-    6. Be precise and accurate - this is for real user data
+    CRITICAL RULES:
+    1. Extract ONLY information actually present in the CV text - do NOT invent data
+    2. If a field is not found, use empty string "" or empty array []
+    3. Be thorough and extract ALL instances (all jobs, all education entries)
+    4. Return ONLY valid JSON - no markdown formatting, no explanations, no code blocks
+    5. Ensure all strings are properly escaped for JSON
     `;
 
     console.log('[CV Analysis] Sending request to OpenAI...');
@@ -242,6 +221,7 @@ export async function POST(request) {
     const analysisText = response.choices[0]?.message?.content || "{}";
     
     console.log('[CV Analysis] Raw OpenAI response length:', analysisText.length);
+    console.log('[CV Analysis] Raw OpenAI response (full):', analysisText);
     
     let cleanedText = analysisText.trim();
     
@@ -252,6 +232,7 @@ export async function POST(request) {
     }
     
     console.log('[CV Analysis] Cleaned response preview:', cleanedText.substring(0, 200));
+    console.log('[CV Analysis] Cleaned response (full):', cleanedText);
     
     try {
       const parsedData = JSON.parse(cleanedText);

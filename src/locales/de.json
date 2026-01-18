@@ -11,10 +11,10 @@
     "theme": "Theme",
     "language": "Sprache",
     "close": "Schließen",
-    "light": "Hell",
-    "dark": "Dunkel",
     "de": "Deutsch",
-    "en": "Englisch"
+    "en": "Englisch",
+    "light": "Hell",
+    "dark": "Dunkel"
   },
   "login": {
     "title": "Anmelden",
@@ -46,6 +46,7 @@
     "discover": "Entdecken",
     "rooms": "Räume",
     "conversations": "Konversationen",
+    "interview": "Simuliertes Interview",
     "settings": "Einstellungen",
     "logout": "Abmelden"
   },
@@ -67,25 +68,35 @@
     "joinRoom": "Raum beitreten",
     "leaveRoom": "Raum verlassen",
     "confirmLeave": "Sind Sie sicher, dass Sie diesen Raum verlassen möchten?",
-    "createRoom": "Raum erstellen",
-    "roomNamePlaceholder": "Raumnamen eingeben...",
-    "conversations": "Konversationen",
-    "addCurrentConversation": "Aktuelle Konversation hinzufügen",
-    "emptyRoom": "Noch keine Konversationen in diesem Raum.",
-    "addExistingConversations": "Vorhandene Konversationen hinzufügen",
-    "noAvailableConversations": "Alle Konversationen sind bereits in diesem Raum",
-    "add": "Hinzufügen",
-    "failedToCreateRoom": "Fehler beim Erstellen des Raums",
-    "errorCreatingRoom": "Fehler beim Erstellen des Raums",
-    "failedToUpdateRoom": "Fehler beim Aktualisieren des Raums",
-    "errorUpdatingRoom": "Fehler beim Aktualisieren des Raums",
-    "deleteRoomConfirm": "Sind Sie sicher, dass Sie diesen Raum löschen möchten? Konversationen werden nicht gelöscht.",
-    "failedToDeleteRoom": "Fehler beim Löschen des Raums",
-    "errorDeletingRoom": "Fehler beim Löschen des Raums",
-    "failedToAddConversation": "Fehler beim Hinzufügen der Konversation zum Raum",
-    "errorAddingConversation": "Fehler beim Hinzufügen der Konversation zum Raum",
-    "failedToRemoveConversation": "Fehler beim Entfernen der Konversation aus dem Raum",
-    "errorRemovingConversation": "Fehler beim Entfernen der Konversation aus dem Raum"
+    "create": "Erstellen"
+  },
+  "interview": {
+    "title": "Simuliertes espräch",
+    "subtitle": "KI-gestütztes Übungsvorstellungsgespräch für Ihre Zielposition",
+    "noJob": "Keine Zielposition gefunden",
+    "noJobMessage": "Um ein simuliertes Vorstellungsgespräch zu starten, müssen Sie eine Zielposition in Ihrem Profil speichern.",
+    "goToProfile": "Zum Profil",
+    "interviewFor": "Vorstellungsgespräch für:",
+    "questionsInfo": "Sie werden 5-10 maßgeschneiderte Fragen basierend auf Ihrer Zielposition gestellt. Nehmen Sie sich Zeit für durchdachte Antworten.",
+    "start": "Vorstellungsgespräch starten",
+    "progress": "Frage {{current}} von {{total}}",
+    "answerPlaceholder": "Geben Sie Ihre Antwort hier ein...",
+    "finish": "Beenden",
+    "generatingQuestions": "KI bereitet Ihre personalisierten Vorstellungsfragen vor...",
+    "summary": "Vorstellungsgesprächszusammenfassung",
+    "summarySubtitle": "Hier sind Ihre Antworten",
+    "restart": "Vorstellungsgespräch neu starten",
+    "export": "Antworten exportieren",
+    "reviewTitle": "Vorstellungsgespräch-Feedback",
+    "reviewSubtitle": "Ihr personalisiertes Feedback vom KI-Interviewer",
+    "strengths": "Was Sie gut gemacht haben",
+    "improvements": "Verbesserungsbereiche",
+    "missingSignals": "Fehlende Informationen",
+    "improvedExamples": "Verbesserte Antwortbeispiele",
+    "nextSteps": "Nächste Schritte zum Üben",
+    "roleTips": "Tipps für diese Rolle",
+    "retry": "Erneut üben",
+    "exportReview": "Feedback exportieren"
   },
   "discover": {
     "title": "Entdecken",
@@ -102,6 +113,9 @@
   },
   "common": {
     "create": "Erstellen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "close": "Schließen"
   }
 }
