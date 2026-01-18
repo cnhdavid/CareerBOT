@@ -46,6 +46,7 @@
     "discover": "Discover",
     "rooms": "Rooms",
     "conversations": "Conversations",
+    "interview": "Simulated Interview",
     "settings": "Settings",
     "logout": "Logout"
   },
@@ -102,6 +103,9 @@
   },
   "common": {
     "create": "Create",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
   }
 }

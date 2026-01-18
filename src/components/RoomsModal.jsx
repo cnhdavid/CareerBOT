@@ -316,14 +316,14 @@ export default function RoomsModal({ onClose, onLoadConversation, currentConvers
                               onClick={() => saveEdit(room._id)}
                               title="Save"
                             >
-                              ✓
+                              <Check size={18} />
                             </button>
                             <button 
                               className="icon-btn"
                               onClick={cancelEdit}
                               title="Cancel"
                             >
-                              ✕
+                              <X size={18} />
                             </button>
                           </>
                         ) : (
