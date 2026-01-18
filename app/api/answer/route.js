@@ -46,8 +46,11 @@ async function getDocumentContext(messages) {
   });
 
   if (documentIds.size === 0) {
+    console.log("📄 No document IDs found in messages");
     return "";
   }
+
+  console.log("📄 Found document IDs:", Array.from(documentIds));
 
   try {
     await connectDB();
@@ -57,12 +60,17 @@ async function getDocumentContext(messages) {
       _id: { $in: Array.from(documentIds) }
     }).select('filename extractedText');
 
+    console.log("📄 Retrieved documents from DB:", documents.length);
+
     // Build context for each document
     documents.forEach(doc => {
       if (doc.extractedText && doc.extractedText.trim()) {
+        console.log(`📄 Adding document context: ${doc.filename} (${doc.extractedText.length} chars)`);
         documentContexts.push(
           `Document: ${doc.filename}\nContent: ${doc.extractedText.trim()}`
         );
+      } else {
+        console.log(`⚠️ Document ${doc.filename} has no extracted text`);
       }
     });
 
@@ -70,7 +78,7 @@ async function getDocumentContext(messages) {
       return "\n\n--- DOCUMENT CONTEXT ---\n" + documentContexts.join("\n\n---\n\n") + "\n--- END DOCUMENT CONTEXT ---";
     }
   } catch (error) {
-    console.error("Error fetching document context:", error);
+    console.error("❌ Error fetching document context:", error);
   }
 
   return "";
@@ -187,6 +195,10 @@ export async function POST(request) {
 
     // Get document context for messages that have document references
     const documentContext = await getDocumentContext(conversationMessages);
+    
+    if (documentContext) {
+      console.log("📄 Document context retrieved, length:", documentContext.length);
+    }
 
     const enhancedSystemPrompt = userContext
       ? `${SYSTEM_PROMPT}\n\nNUTZER-KONTEXT: ${userContext}${documentContext}`
